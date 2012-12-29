@@ -750,6 +750,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Haptic on action
     boolean mHapticOnAction;
 
+    // Behavior of HOME button during an incoming call.
+    boolean mRingHomeBehavior;
+
     Display mDisplay;
 
     private int mDisplayRotation;
@@ -1028,6 +1031,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.INCALL_BACK_BUTTON_BEHAVIOR), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.RING_HOME_BUTTON_BEHAVIOR), false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.WAKE_GESTURE_ENABLED), false, this,
@@ -2514,6 +2520,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 	     mHapticOnAction = (Settings.System.getIntForUser(resolver,
                     Settings.System.HAPTIC_ON_ACTION_KEY, 0, 
 		    UserHandle.USER_CURRENT) == 1);
+            mRingHomeBehavior = (Settings.System.getIntForUser(resolver,
+                    Settings.System.RING_HOME_BUTTON_BEHAVIOR, 0,
+                    UserHandle.USER_CURRENT) ==1);
 
             // Configure wake gesture.
             boolean wakeGestureEnabledSetting = Settings.Secure.getIntForUser(resolver,
@@ -3702,6 +3711,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (canceled) {
                     Log.i(TAG, "Ignoring HOME; event canceled.");
                     return -1;
+                }
+
+                if (mRingHomeBehavior) {
+                    final TelecomManager telecomManager = getTelecommService();
+                    if (telecomManager != null && telecomManager.isRinging()) {
+                        telecomManager.acceptRingingCall();
+                        return -1;
+                    }
                 }
 
                 // Delay handling home if a double-tap is possible.
