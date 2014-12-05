@@ -4376,8 +4376,13 @@ public final class Settings {
         public static final String VOLUME_KEYS_CONTROL_MEDIA_STREAM =
                 "volume_keys_control_media_stream";
 
-        /** Whether to skip music track with volume rocker
         /**
+         * Show the pending notification counts as overlays on the status bar
+         * @hide
+         */
+        public static final String STATUS_BAR_NOTIF_COUNT = "status_bar_notif_count";
+
+        /** Whether to skip music track with volume rocker
          * @hide
          */
         public static final String VOLUME_BUTTON_MUSIC_CONTROL = "volume_button_music_control";
