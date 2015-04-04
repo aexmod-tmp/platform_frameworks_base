@@ -4419,8 +4419,14 @@ public final class Settings {
          * Defines the global heads up notification snooze
          * @hide
          */
+
         public static final String HEADS_UP_NOTIFICATION_SNOOZE = "heads_up_notification_snooze";
 
+        /**
+         * show the membar in recents
+         *  @hide
+         */
+        public static final String SYSTEMUI_RECENTS_MEM_DISPLAY = "systemui_recents_mem_display";
 
         /**
          * Allow all rotations.
