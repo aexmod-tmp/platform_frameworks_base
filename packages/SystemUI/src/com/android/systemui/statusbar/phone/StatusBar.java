@@ -839,6 +839,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private View mNavigationBarView;
     private FlashlightController mFlashlightController;
 
+    private boolean mLockscreenMediaMetadata;
+
     @Override
     public void start() {
         mNetworkController = Dependency.get(NetworkController.class);
@@ -2543,7 +2545,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         Drawable artworkDrawable = null;
-        if (mMediaMetadata != null) {
+        if (mMediaMetadata != null && mLockscreenMediaMetadata) {
             Bitmap artworkBitmap = null;
             artworkBitmap = mMediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
             if (artworkBitmap == null) {
@@ -6019,6 +6021,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.QS_COLUMNS_LANDSCAPE),
                     false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.LOCKSCREEN_MEDIA_METADATA),
+                    false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -6045,6 +6050,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 	    setLockscreenDoubleTapToSleep();
             setStatusDoubleTapToSleep();
             setQsRowsColumns();
+            setLockscreenMediaMetadata();
         }
     }
 
@@ -6084,6 +6090,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mQSPanel != null) {
             mQSPanel.updateResources();
         }
+    }
+
+    private void setLockscreenMediaMetadata() {
+        mLockscreenMediaMetadata = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.LOCKSCREEN_MEDIA_METADATA, 0, UserHandle.USER_CURRENT) == 1;
     }
 
     private RemoteViews.OnClickHandler mOnClickHandler = new RemoteViews.OnClickHandler() {
