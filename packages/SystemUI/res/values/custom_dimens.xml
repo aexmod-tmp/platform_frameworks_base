@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2017 Benzo Rom
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+
+    <!-- OPA home dimens -->
+    <dimen name="halo_inner_radius">8.0dip</dimen>
+    <dimen name="halo_thickness">1.0dip</dimen>
+    <dimen name="halo_diameter">18.0dip</dimen>
+    <dimen name="opa_dot_diam">10.0dip</dimen>
+    <dimen name="opa_diamond_translation">16.0dip</dimen>
+    <dimen name="opa_line_y_translation">16.0dip</dimen>
+    <dimen name="opa_line_x_trans_ry">15.0dip</dimen>
+    <dimen name="opa_line_x_trans_bg">30.0dip</dimen>
+    <dimen name="opa_line_x_collapse_bg">46.0dip</dimen>
+    <dimen name="opa_line_x_collapse_ry">15.0dip</dimen>
+    <dimen name="opa_overshoot_translation">8.0dip</dimen>
+    <dimen name="opa_return_translation">-1.0dip</dimen>
+    <dimen name="opa_rest_to_collapse">7.0dip</dimen>
+
+    <!-- Floating action button -->
+    <dimen name="floating_action_button_height">54dp</dimen>
+    <dimen name="floating_action_button_width">54dp</dimen>
+    <dimen name="floating_action_button_translation_z">12dp</dimen>
+    <dimen name="floating_action_button_margin_side">54dp</dimen>
+    <dimen name="floating_action_button_margin_bottom">54dp</dimen>
+
+    <!-- Membar spacing -->
+    <dimen name="recents_membar_spacing">12dp</dimen>
+
+    <!-- QS Stuff -->
+    <dimen name="qs_brightness_footer_padding">12dp</dimen>
+    <dimen name="qs_footer_padding_top">0dp</dimen>
+    <dimen name="qs_page_indicator_margin_bottom">24dp</dimen>
+    <dimen name="qs_paged_tile_layout_padding_bottom">4dp</dimen>
+    <dimen name="qs_scroller_margin">8dp</dimen>
+    <dimen name="qs_tile_height_wo_label">48dp</dimen>
+
+    <!-- App sidebar -->
+    <dimen name="app_sidebar_item_size">60dp</dimen>
+    <dimen name="app_sidebar_item_padding">2dp</dimen>
+    <dimen name="tab_width">16dp</dimen>
+    <dimen name="tab_height">32dp</dimen>
+    <dimen name="drag_item_size">80dp</dimen>
+    <dimen name="icon_size">48dp</dimen>
+    <dimen name="item_title_text_size">12sp</dimen>
+    <dimen name="item_above_below_delta">16dp</dimen>
+    <dimen name="folder_padding">0dp</dimen>
+    <dimen name="folder_name_padding">10dp</dimen>
+    <dimen name="folder_width">290dp</dimen>
+    <dimen name="folder_height">480dp</dimen>
+    <dimen name="setup_sidebar_width">90dp</dimen>
+
+    <!-- Network traffic monitor -->
+    <dimen name="net_traffic_multi_text_size">8dp</dimen>
+    <dimen name="net_traffic_txt_img_padding">2dp</dimen>
+
+    <!-- Screenrecord -->
+    <dimen name="screenrecord_hint_size">48dp</dimen>
+
+    <dimen name="fab_margin">16dp</dimen>
+
+    <dimen name="text_size_m">24sp</dimen>
+    <dimen name="text_size_s">17sp</dimen>
+    <dimen name="button_height">40dp</dimen>
+
+    <dimen name="crop_buttons">48dp</dimen>
+    <dimen name="crop_color_rect">32dp</dimen>
+</resources>
