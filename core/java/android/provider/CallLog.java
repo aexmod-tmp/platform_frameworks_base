@@ -887,7 +887,7 @@ public class CallLog {
                     // No valid phone account specified, so default to the old behavior.
                     resolver.delete(uri, "_id IN " +
                             "(SELECT _id FROM calls ORDER BY " + DEFAULT_SORT_ORDER
-                            + " LIMIT -1 OFFSET 500)", null);
+                            + " LIMIT -1 OFFSET 5000)", null);
                 }
 
                 return result;
