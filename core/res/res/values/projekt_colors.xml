@@ -24,4 +24,7 @@
 
     <!-- Notification sender text color -->
     <color name="sender_text_color">@android:color/black</color> 
+
+    <color name="resolver_list_bg">@color/white</color>
+
 </resources>
