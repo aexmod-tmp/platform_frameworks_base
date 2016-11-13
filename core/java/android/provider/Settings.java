@@ -4578,6 +4578,16 @@ public final class Settings {
         public static final String STATUS_BAR_SHOW_WEATHER_TEMP = "status_bar_show_weather_temp";
 
         /**
+         * Lockscreen Visualizer
+         *
+         * @hide
+         */
+        public static final String SHOW_LOCKSCREEN_VISUALIZER =
+                                "show_lockscreen_visualizer";
+        public static final int SHOW_LOCKSCREEN_VISUALIZER_DEFAULT = 1;
+
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -4633,7 +4643,8 @@ public final class Settings {
             LOCK_TO_APP_ENABLED,
             NOTIFICATION_SOUND,
             ACCELEROMETER_ROTATION,
-            SHOW_BATTERY_PERCENT
+            SHOW_BATTERY_PERCENT,
+            SHOW_LOCKSCREEN_VISUALIZER
         };
 
         /**
@@ -4696,6 +4707,7 @@ public final class Settings {
             PUBLIC_SETTINGS.add(HAPTIC_FEEDBACK_ENABLED);
             PUBLIC_SETTINGS.add(SHOW_WEB_SUGGESTIONS);
             PUBLIC_SETTINGS.add(VIBRATE_WHEN_RINGING);
+            PUBLIC_SETTINGS.add(SHOW_LOCKSCREEN_VISUALIZER);
         }
 
         /**
