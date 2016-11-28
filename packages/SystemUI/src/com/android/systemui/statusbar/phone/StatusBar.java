@@ -6415,6 +6415,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SYSTEM_THEME_STYLE),
                     false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QS_TILE_TITLE_VISIBILITY),
+                    false, this, UserHandle.USER_ALL);
             update();
         }
 
@@ -6445,8 +6448,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                     Settings.System.SHOW_FOURG, 0, UserHandle.USER_CURRENT) == 1;
 	    setLockscreenDoubleTapToSleep();
             setStatusDoubleTapToSleep();
-            setQsRowsColumns();
             setLockscreenMediaMetadata();
+            updateQsPanelResources();
             setBrightnessSlider();
             updateTheme();
             setHeadsUpStoplist();
@@ -6494,7 +6497,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
 
-    private void setQsRowsColumns() {
+    private void updateQsPanelResources() {
         if (mQSPanel != null) {
             mQSPanel.updateResources();
         }
