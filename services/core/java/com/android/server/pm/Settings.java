@@ -3166,10 +3166,13 @@ final class Settings {
                     XmlUtils.skipCurrentTag(parser);
                 }
             }
-        } catch (XmlPullParserException | java.io.IOException e) {
+        } catch (XmlPullParserException | IOException | NumberFormatException e) {
+            mSettingsFilename.delete();
             mReadMessages.append("Error reading: " + e.toString());
             PackageManagerService.reportSettingsProblem(Log.ERROR, "Error reading settings: " + e);
             Slog.wtf(PackageManagerService.TAG, "Error reading package manager settings", e);
+            throw new IllegalStateException("Failed parsing settings file: "
+                    + mSettingsFilename , e);
         } finally {
             IoUtils.closeQuietly(str);
         }
