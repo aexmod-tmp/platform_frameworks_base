@@ -112,5 +112,9 @@
     <string name="permlab_preventpower">override power key</string>
     <!-- [CHAR LIMIT=NONE] Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_preventpower">Allows an app to override the power key.</string>
+
+    <!-- accessibility label for button to open running apps prefscreen [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_running_services">Open Running Services screen.</string>
+
 </resources>
 
