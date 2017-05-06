@@ -91,17 +91,14 @@ public class KeyguardStatusView extends GridLayout implements
     private View mWeatherView;
     private TextView mWeatherCity;
     private ImageView mWeatherConditionImage;
-    private Drawable mWeatherConditionDrawable;
     private TextView mWeatherCurrentTemp;
     private TextView mWeatherConditionText;
     private OmniJawsClient mWeatherClient;
     private OmniJawsClient.WeatherInfo mWeatherData;
-    private boolean mWeatherEnabled;
 
     private boolean mShowWeather;
     private boolean mShowConditionIcon;
     private boolean mShowLocation;
-    private int mIconNameValue = -1;
 
     private SettingsObserver mSettingsObserver;
 
@@ -157,7 +154,6 @@ public class KeyguardStatusView extends GridLayout implements
         mLockPatternUtils = new LockPatternUtils(getContext());
         mHandler = new Handler(Looper.myLooper());
         mWeatherClient = new OmniJawsClient(mContext);
-        mWeatherEnabled = mWeatherClient.isOmniJawsEnabled();
     }
 
     private void setEnableMarquee(boolean enabled) {
@@ -300,10 +296,8 @@ public class KeyguardStatusView extends GridLayout implements
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mInfoCallback);
-        mWeatherEnabled = mWeatherClient.isOmniJawsEnabled();
         mWeatherClient.addObserver(this);
         mSettingsObserver.observe();
-        queryAndUpdateWeather();
     }
 
     @Override
@@ -338,23 +332,20 @@ public class KeyguardStatusView extends GridLayout implements
 
     public void queryAndUpdateWeather() {
         try {
-                if (mWeatherEnabled) {
-                    mWeatherClient.queryWeather();
-                    mWeatherData = mWeatherClient.getWeatherInfo();
-                    mWeatherCity.setText(mWeatherData.city);
-                    mWeatherConditionImage.setImageDrawable(
-                        mWeatherClient.getWeatherConditionImage(mWeatherData.conditionCode));
-                    mWeatherCurrentTemp.setText(mWeatherData.temp + mWeatherData.tempUnits);
-                    mWeatherConditionText.setText(mWeatherData.condition);
-                    updateSettings(false);
-                } else {
-                    mWeatherCity.setText(null);
-                    mWeatherConditionImage.setImageDrawable(mContext
-                        .getResources().getDrawable(R.drawable.keyguard_weather_default_off));
-                    mWeatherCurrentTemp.setText(null);
-                    mWeatherConditionText.setText(null);
-                    updateSettings(true);
+            if (mWeatherClient.isOmniJawsEnabled() && mShowWeather) {
+                mWeatherClient.queryWeather();
+                mWeatherData = mWeatherClient.getWeatherInfo();
+                if (mWeatherData == null) {
+                    updateSettings();
+                    return;
                 }
+                mWeatherCity.setText(mWeatherData.city);
+                mWeatherConditionImage.setImageDrawable(
+                    mWeatherClient.getWeatherConditionImage(mWeatherData.conditionCode));
+                mWeatherCurrentTemp.setText(mWeatherData.temp + mWeatherData.tempUnits);
+                mWeatherConditionText.setText(mWeatherData.condition);
+            }
+            updateSettings();
        } catch(Exception e) {
           // Do nothing
        }
@@ -365,53 +356,67 @@ public class KeyguardStatusView extends GridLayout implements
         return false;
     }
 
-    private void updateSettings(boolean forceHide) {
-        final ContentResolver resolver = getContext().getContentResolver();
-        final Resources res = getContext().getResources();
+    private void updateSettings() {
         View weatherPanel = findViewById(R.id.weather_panel);
         TextView noWeatherInfo = (TextView) findViewById(R.id.no_weather_info_text);
+        boolean mWeatherEnabled = mWeatherClient.isOmniJawsEnabled();
 
-        if (mWeatherView != null) {
-            mWeatherView.setVisibility(mShowWeather ?
-                View.VISIBLE : View.GONE);
-        }
+        if (mWeatherView == null || weatherPanel == null)
+            return;
+
+        mWeatherView.setVisibility(mShowWeather ? View.VISIBLE : View.GONE);
+
         if (noWeatherInfo != null) {
-            noWeatherInfo.setVisibility(forceHide ?
+            noWeatherInfo.setVisibility(mShowWeather && !mWeatherClient.isOmniJawsEnabled() ?
                 View.VISIBLE : View.GONE);
         }
-        if (weatherPanel != null) {
-            weatherPanel.setVisibility(forceHide ?
-                View.GONE : View.VISIBLE);
+        if (mWeatherEnabled && mShowWeather && mWeatherConditionText != null &&
+                mWeatherConditionText.getText() != null) {
+            mWeatherConditionText.setVisibility(View.VISIBLE);
+        } else if (mWeatherConditionText != null) {
+            mWeatherConditionText.setVisibility(View.GONE);
         }
-        if (mWeatherConditionText != null) {
-            mWeatherConditionText.setVisibility(forceHide ?
-                View.GONE : View.VISIBLE);
+        if (mWeatherEnabled && mShowWeather && mShowConditionIcon &&
+                mWeatherConditionImage != null) {
+            mWeatherConditionImage.setVisibility(View.VISIBLE);
+        } else if (mShowWeather && mShowConditionIcon &&
+                mWeatherConditionImage != null) {
+            mWeatherConditionImage.setImageDrawable(mContext
+                .getResources().getDrawable(R.drawable.keyguard_weather_default_off));
+            mWeatherConditionImage.setVisibility(View.VISIBLE);
+        } else if (mWeatherConditionImage != null) {
+            mWeatherConditionImage.setVisibility(View.GONE);
         }
-        if (mWeatherConditionImage != null) {
-            if (mShowConditionIcon) {
-                mWeatherConditionImage.setVisibility(forceHide ?
-                    View.GONE : View.VISIBLE);
-            } else {
-                mWeatherConditionImage.setVisibility(View.GONE);
-            }
+        if (mWeatherEnabled && mShowWeather && mWeatherCurrentTemp != null &&
+                mWeatherCurrentTemp.getText() != null) {
+            mWeatherCurrentTemp.setVisibility(View.VISIBLE);
+        } else if (mWeatherCurrentTemp != null) {
+            mWeatherCurrentTemp.setVisibility(View.GONE);
         }
-        if (mWeatherCurrentTemp != null) {
-            mWeatherCurrentTemp.setVisibility(forceHide ?
-                View.GONE : View.VISIBLE);
+        if (mWeatherEnabled && mShowWeather && mShowLocation &&
+                mWeatherCity != null && mWeatherCity.getText() != null) {
+            mWeatherCity.setVisibility(View.VISIBLE);
+        } else if (mWeatherCity != null) {
+            mWeatherCity.setVisibility(View.GONE);
         }
-        if (mWeatherCity != null) {
-            if (mShowLocation) {
-                mWeatherCity.setVisibility(forceHide ?
-                    View.GONE : View.VISIBLE);
-            } else {
-                mWeatherCity.setVisibility(View.GONE);
-            }
+        if (mWeatherConditionText.getVisibility() != View.VISIBLE &&
+                mWeatherConditionImage.getVisibility() != View.VISIBLE &&
+                mWeatherCurrentTemp.getVisibility() != View.VISIBLE) {
+            weatherPanel.setVisibility(View.GONE);
+            noWeatherInfo.setVisibility(mShowWeather ?
+                View.VISIBLE : View.GONE);
+        } else {
+            weatherPanel.setVisibility(mShowWeather ?
+                View.VISIBLE : View.GONE);
         }
     }
 
     @Override
     public void weatherError(int errorReason) {
         if (DEBUG) Log.d(TAG, "weatherError " + errorReason);
+        if (mShowWeather && !mWeatherClient.isOmniJawsEnabled()) {
+            updateSettings();
+        }
     }
 
     // DateFormat.getBestDateTimePattern is extremely expensive, and refresh is called often.
@@ -504,54 +509,53 @@ public class KeyguardStatusView extends GridLayout implements
         }
 
         void observe() {
-           ContentResolver resolver = mContext.getContentResolver();
-           resolver.registerContentObserver(Settings.System.getUriFor(
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(Settings.System.getUriFor(
                    Settings.System.LOCK_SCREEN_WEATHER_CONDITION_ICON), false, this, UserHandle.USER_ALL);
-           resolver.registerContentObserver(Settings.System.getUriFor(
+            resolver.registerContentObserver(Settings.System.getUriFor(
                    Settings.System.LOCK_SCREEN_SHOW_WEATHER), false, this, UserHandle.USER_ALL);
-           resolver.registerContentObserver(Settings.System.getUriFor(
-                  Settings.System.OMNIJAWS_WEATHER_ICON_PACK), false, this, UserHandle.USER_ALL);
-           resolver.registerContentObserver(Settings.System.getUriFor(
+            resolver.registerContentObserver(Settings.System.getUriFor(
                   Settings.System.LOCK_SCREEN_SHOW_WEATHER_LOCATION), false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.OMNIJAWS_WEATHER_ICON_PACK), false, this, UserHandle.USER_ALL);
 
-           update();
+            mShowWeather = Settings.System.getIntForUser(resolver,
+                  Settings.System.LOCK_SCREEN_SHOW_WEATHER, 0, UserHandle.USER_CURRENT) == 1;
+            mShowConditionIcon = Settings.System.getIntForUser(resolver,
+                  Settings.System.LOCK_SCREEN_WEATHER_CONDITION_ICON, 1, UserHandle.USER_CURRENT) == 1;
+            mShowLocation = Settings.System.getIntForUser(resolver,
+                  Settings.System.LOCK_SCREEN_SHOW_WEATHER_LOCATION, 1, UserHandle.USER_CURRENT) == 1;
+            queryAndUpdateWeather();
         }
 
         void unobserve() {
-           ContentResolver resolver = mContext.getContentResolver();
-           resolver.unregisterContentObserver(this);
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.unregisterContentObserver(this);
         }
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-           if (uri.equals(Settings.System.getUriFor(
+            ContentResolver resolver = mContext.getContentResolver();
+
+            if (uri.equals(Settings.System.getUriFor(
                    Settings.System.LOCK_SCREEN_SHOW_WEATHER))) {
-               updateSettings(false);
-           } else if (uri.equals(Settings.System.getUriFor(
+                mShowWeather = Settings.System.getIntForUser(resolver,
+                    Settings.System.LOCK_SCREEN_SHOW_WEATHER, 0, UserHandle.USER_CURRENT) == 1;
+                queryAndUpdateWeather();
+            } else if (uri.equals(Settings.System.getUriFor(
                    Settings.System.LOCK_SCREEN_WEATHER_CONDITION_ICON))) {
-               updateSettings(false);
-           } else if (uri.equals(Settings.System.getUriFor(
-                   Settings.System.OMNIJAWS_WEATHER_ICON_PACK))) {
-               queryAndUpdateWeather();
-           }  else if (uri.equals(Settings.System.getUriFor(
+                mShowConditionIcon = Settings.System.getIntForUser(resolver,
+                    Settings.System.LOCK_SCREEN_WEATHER_CONDITION_ICON, 1, UserHandle.USER_CURRENT) == 1;
+                updateSettings();
+            } else if (uri.equals(Settings.System.getUriFor(
                    Settings.System.LOCK_SCREEN_SHOW_WEATHER_LOCATION))) {
-               updateSettings(false);
-           }
-           update();
+                mShowLocation = Settings.System.getIntForUser(resolver,
+                    Settings.System.LOCK_SCREEN_SHOW_WEATHER_LOCATION, 1, UserHandle.USER_CURRENT) == 1;
+                updateSettings();
+            } else if (uri.equals(Settings.System.getUriFor(
+                   Settings.System.OMNIJAWS_WEATHER_ICON_PACK))) {
+                queryAndUpdateWeather();
+            }
         }
-
-         public void update() {
-           ContentResolver resolver = mContext.getContentResolver();
-           int currentUserId = ActivityManager.getCurrentUser();
-
-           mShowWeather = Settings.System.getInt(resolver,
-                Settings.System.LOCK_SCREEN_SHOW_WEATHER, 0) == 1;
-           mShowConditionIcon = Settings.System.getInt(resolver,
-                Settings.System.LOCK_SCREEN_WEATHER_CONDITION_ICON, 1) == 1;
-           mShowLocation = Settings.System.getInt(resolver,
-                Settings.System.LOCK_SCREEN_SHOW_WEATHER_LOCATION, 1) == 1;
-
-           updateSettings(false);
-         }
     }
 }
