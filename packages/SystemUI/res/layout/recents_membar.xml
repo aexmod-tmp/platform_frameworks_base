@@ -28,12 +28,12 @@
     <ProgressBar android:id="@+id/recents_memory_bar"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:layout_gravity="top|center"
-        android:layout_marginTop="4dp"
-        android:layout_marginStart="14dp"
-        android:layout_marginEnd="14dp"
-        android:layout_marginBottom="0dp"
-        style="?android:attr/progressBarStyleHorizontal" />
+        android:layout_gravity="top|left"
+        android:layout_marginTop="7dp"
+        android:layout_marginRight="25dp"
+        android:layout_marginLeft="25dp"
+        android:progressDrawable="@drawable/membar_progress"
+        />
 
     <TextView android:id="@+id/recents_memory_text"
         android:layout_width="wrap_content"
