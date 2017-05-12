@@ -57,5 +57,9 @@
     <color name="quick_settings_theme_tile_jade_green">#9ABC98</color>
     <color name="quick_settings_theme_tile_black">#000000</color>
     <color name="quick_settings_theme_tile_white">#ffffff</color>
+
+     <!-- Recents Memory bar -->
+    <color name="recents_memory_progress_overall">@*android:color/resize_shadow_start_color</color>
+    <color name="recents_memory_progress_free">@*android:color/accent_device_default_light</color>
 </resources>
 
