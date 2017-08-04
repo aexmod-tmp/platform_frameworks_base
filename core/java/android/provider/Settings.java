@@ -4598,6 +4598,12 @@ public final class Settings {
         public static final String LOCK_SCREEN_AMBIENT_WEATHER = "lock_screen_ambient_weather";
 
         /**
+         * Sensor block per-package
+         * @hide
+         */
+        public static final String SENSOR_BLOCK = "sensor_block";
+
+        /**
          * @hide
          */
         public static final String OMNIJAWS_WEATHER_ICON_PACK = "omnijaws_weather_icon_pack";
