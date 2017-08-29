@@ -27,4 +27,7 @@
   <!-- PlatLogo -->
   <java-symbol type="drawable" name="platlogo_aex" />
 
+  <java-symbol type="integer" name="config_buttonBrightnessSettingDefault" />
+  <java-symbol type="bool" name="config_deviceHasVariableButtonBrightness" />
+
 </resources>
