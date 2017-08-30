@@ -199,6 +199,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.navigation.Navigator;
+import com.android.systemui.omni.StatusBarHeaderMachine;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
@@ -921,6 +922,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private FlashlightController mFlashlightController;
 
     private boolean mLockscreenMediaMetadata;
+    private StatusBarHeaderMachine mStatusBarHeaderMachine;
 
     @Override
     public void start() {
@@ -1326,6 +1328,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             createUserSwitcher();
         }
 
+        mStatusBarHeaderMachine = new StatusBarHeaderMachine(mContext);
+
         // Set up the quick settings tile panel
         View container = mStatusBarWindow.findViewById(R.id.qs_frame);
         if (container != null) {
@@ -1349,6 +1353,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mQSPanel.setBrightnessMirror(mBrightnessMirrorController);
                     mKeyguardStatusBar.setQSPanel(mQSPanel);
                     mQuickStatusBarHeader = ((QSFragment) qs).getQuickStatusBarHeader();
+                    mStatusBarHeaderMachine.addObserver(mQuickStatusBarHeader);
+                    mStatusBarHeaderMachine.updateEnablement();
                 }
             });
         }
@@ -5527,6 +5533,14 @@ public class StatusBar extends SystemUI implements DemoMode,
     // We can't remove you yet but we can make you more abstract ;D
     public Navigator getNavigationBarView() {
         return mNavigationBar != null ? mNavigationBar.getNavigator() : null;
+    }
+
+     /**
+     * TODO: Remove this method. Views should not be passed forward. Will cause theme issues.
+     * @return bottom area view
+     */
+     public KeyguardBottomAreaView getKeyguardBottomAreaView() {
+        return mNotificationPanel.getKeyguardBottomAreaView();
     }
 
     // ---------------------- DragDownHelper.OnDragDownListener ------------------------------------
