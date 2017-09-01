@@ -6001,13 +6001,14 @@ public class StatusBar extends SystemUI implements DemoMode,
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SHOW_FOURG),
                     false, this, UserHandle.USER_ALL);
-            update();
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.DOUBLE_TAP_SLEEP_LOCKSCREEN),
+                    false, this, UserHandle.USER_ALL);
         }
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             super.onChange(selfChange, uri);
-            update();
             if (uri.equals(Settings.System.getUriFor(
                     Settings.System.SHOW_FOURG))) {
                     mShow4G = Settings.System.getIntForUser(
@@ -6019,12 +6020,15 @@ public class StatusBar extends SystemUI implements DemoMode,
                             updateClearAll();
                             updateEmptyShadeView();
             }
+            update();
         }
 
         public void update() {
             ContentResolver resolver = mContext.getContentResolver();
             boolean mShow4G = Settings.System.getIntForUser(resolver,
                     Settings.System.SHOW_FOURG, 0, UserHandle.USER_CURRENT) == 1;
+	    setLockscreenDoubleTapToSleep();
+
         }
     }
 
@@ -6046,6 +6050,12 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         }
     };
+
+    private void setLockscreenDoubleTapToSleep() {
+        if (mStatusBarWindow != null) {
+            mStatusBarWindow.setLockscreenDoubleTapToSleep();
+        }
+    }
 
     private RemoteViews.OnClickHandler mOnClickHandler = new RemoteViews.OnClickHandler() {
 
