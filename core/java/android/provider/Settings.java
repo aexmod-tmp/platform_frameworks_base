@@ -3990,6 +3990,7 @@ public final class Settings {
         public static final String MTP_DIRTY_HACK_SAVE = "mtp_dirty_hack_save";
 
         /**
+<<<<<<< HEAD
          * Whether the phone vibrates on call connect
          * @hide
          */
@@ -4231,6 +4232,18 @@ public final class Settings {
          * @hide
          */
         public static final String VOLUME_LINK_NOTIFICATION = "volume_link_notification";
+
+        /**
+         * Enable blocking wakelock
+         * @hide
+         */
+        public static final String WAKELOCK_BLOCKING_ENABLED = "wakelock_blocking_enabled";
+
+        /**
+         * List of wakelock blocks selected
+         * @hide
+         */
+        public static final String WAKELOCK_BLOCKING_LIST = "wakelock_blocking_list";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
