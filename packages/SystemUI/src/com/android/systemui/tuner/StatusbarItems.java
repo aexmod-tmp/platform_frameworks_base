@@ -58,5 +58,6 @@ public class StatusbarItems extends PreferenceFragment {
             return true;
         }
         return super.onPreferenceTreeClick(preference);
+
     }
 }

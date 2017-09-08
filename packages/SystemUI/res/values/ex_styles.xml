@@ -72,4 +72,9 @@
     <!-- <style name="ContainerActivityTheme"
         parent="@android:style/Theme.Translucent.NoTitleBar">
     </style>-->
+
+    <!-- Pure Tuner Theme-->
+    <style name="ExTunerSettings" parent="@android:style/Theme.Material.Settings">
+        <item name="preferenceTheme">@style/TunerPreferenceTheme</item>
+    </style>
 </resources>
