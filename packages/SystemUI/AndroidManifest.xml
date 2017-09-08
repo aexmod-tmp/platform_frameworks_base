@@ -342,9 +342,10 @@
         </activity>
 
         <activity android:name=".tuner.LockscreenActivity"
-                  android:theme="@style/CustomTunerSettings"
+                  android:theme="@style/ExTunerSettings"
                   android:label="@string/tuner_lock_screen"
                   android:process=":tuner"
+                  android:parentActivityName="org.aospextended.extensions.PartsFragment"
                   android:exported="true">
         </activity>
 
