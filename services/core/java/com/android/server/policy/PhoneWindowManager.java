@@ -877,15 +877,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_DISPATCH_BACK_KEY_TO_AUTOFILL = 24;
     private static final int MSG_SYSTEM_KEY_PRESS = 25;
     private static final int MSG_HANDLE_ALL_APPS = 26;
-
-    private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
-    private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
     private static final int MSG_TOGGLE_TORCH = 27;
-
-    private boolean mClearedBecauseOfForceShow;
-    private boolean mTopWindowIsKeyguard;
-
     private static final int MSG_DISPATCH_VOLKEY_WITH_WAKE_LOCK = 28;
+
+    private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 29;
+    private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 30;
 
     private boolean mClearedBecauseOfForceShow;
     private boolean mTopWindowIsKeyguard;
