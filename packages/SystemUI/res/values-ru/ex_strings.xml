@@ -80,4 +80,8 @@
     <!-- Heads up snooze toast -->
     <string name="heads_up_snooze_message_one_minute"><xliff:g id="string">%s</xliff:g> - Всплывающее уведомление отложено на 1 минуту.</string>
     <string name="heads_up_snooze_message"><xliff:g id="string">%s</xliff:g> - Всплывающее уведомление отложено на <xliff:g id="number">%d</xliff:g> минут.</string>
+
+    <!-- Recents -->
+    <string name="recents_app_killed">Приложение закрыто</string>
+
 </resources>
