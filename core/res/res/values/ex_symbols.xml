@@ -41,4 +41,7 @@
   <java-symbol type="string" name="reboot_title" />
   <java-symbol type="string" name="reboot_message" />
 
+
+    <java-symbol type="anim" name="du_app_in" />
+    <java-symbol type="anim" name="du_app_out" />
 </resources>
