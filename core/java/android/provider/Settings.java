@@ -4164,6 +4164,11 @@ public final class Settings {
         public static final String POWERMENU_SETTINGS = "powermenu_settings";
 
         /**
+         * @hide
+         */
+        public static final String SHOW_BATTERY_IMAGE = "status_bar_show_battery_image";
+
+        /**
          * Whether to display lock in the power menu
          *
          * @hide
