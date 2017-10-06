@@ -4685,6 +4685,7 @@ public final class Settings {
         public static final String MEDIA_SCANNER_ON_BOOT = "media_scanner_on_boot";
 
         /**
+<<<<<<< HEAD
          * Show or hide clock
          * 0 - hide
          * 1 - show (default)
@@ -4764,6 +4765,12 @@ public final class Settings {
          * @hide
          */
         public static final String STATUSBAR_CLOCK_DATE_FORMAT = "statusbar_clock_date_format";
+
+        /**
+         * Whether to use icon pack for Recents
+         * @hide
+         */
+        public static final String RECENTS_ICON_PACK = "recents_icon_pack";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
