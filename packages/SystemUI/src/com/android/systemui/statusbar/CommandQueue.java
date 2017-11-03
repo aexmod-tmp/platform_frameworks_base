@@ -80,20 +80,16 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_DISMISS_KEYBOARD_SHORTCUTS    = 32 << MSG_SHIFT;
     private static final int MSG_HANDLE_SYSTEM_KEY             = 33 << MSG_SHIFT;
     private static final int MSG_SHOW_GLOBAL_ACTIONS           = 34 << MSG_SHIFT;
-<<<<<<< HEAD
     private static final int MSG_TOGGLE_PANEL                  = 35 << MSG_SHIFT;
     private static final int MSG_SHOW_SHUTDOWN_UI              = 36 << MSG_SHIFT;
     private static final int MSG_SET_TOP_APP_HIDES_STATUS_BAR  = 37 << MSG_SHIFT;
-    private static final int MSG_TOGGLE_CAMERA_FLASH           = 38 << MSG_SHIFT;
-    private static final int MSG_RESTART_UI                    = 39 << MSG_SHIFT;
-=======
-    private static final int MSG_SCREEN_PINNING_STATE_CHANGED  = 35 << MSG_SHIFT;
-    private static final int MSG_LEFT_IN_LANDSCAPE_STATE_CHANGED  = 36 << MSG_SHIFT;
-    private static final int MSG_TOGGLE_FLASHLIGHT             = 37 << MSG_SHIFT;
-    private static final int MSG_TOGGLE_NAVIGATION_EDITOR      = 38 << MSG_SHIFT;
-    private static final int MSG_DISPATCH_NAVIGATION_EDITOR_RESULTS = 39 << MSG_SHIFT;
-    private static final int MSG_TOGGLE_CAMERA_FLASH           = 40 << MSG_SHIFT;
->>>>>>> 35a1811... DUI: Initial checkin for Oreo [5/7]
+    private static final int MSG_RESTART_UI                    = 38 << MSG_SHIFT;
+    private static final int MSG_SCREEN_PINNING_STATE_CHANGED  = 39 << MSG_SHIFT;
+    private static final int MSG_LEFT_IN_LANDSCAPE_STATE_CHANGED  = 40 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_FLASHLIGHT             = 41 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_NAVIGATION_EDITOR      = 42 << MSG_SHIFT;
+    private static final int MSG_DISPATCH_NAVIGATION_EDITOR_RESULTS = 43 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_CAMERA_FLASH           = 44 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -155,16 +151,13 @@ public class CommandQueue extends IStatusBar.Stub {
         default void handleShowGlobalActionsMenu() { }
         default void handleShowShutdownUi(boolean isReboot, String reason) { }
         default void toggleCameraFlash() { }
-<<<<<<< HEAD
         default void restartUI() { }
-=======
 
         default void screenPinningStateChanged(boolean enabled) {}
         default void leftInLandscapeChanged(boolean isLeft) {}
         default void toggleFlashlight() {}
         default void toggleNavigationEditor() {}
         default void dispatchNavigationEditorResults(Intent intent) {}
->>>>>>> 35a1811... DUI: Initial checkin for Oreo [5/7]
     }
 
     @VisibleForTesting

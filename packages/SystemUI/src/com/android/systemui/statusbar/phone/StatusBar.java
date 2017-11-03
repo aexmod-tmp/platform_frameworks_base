@@ -651,25 +651,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    private void tickTrackInfo() {
-        ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
-        int N = activeNotifications.size();
-        if (PlaybackState.STATE_PLAYING ==
-                getMediaControllerPlaybackState(mMediaController)
-                || PlaybackState.STATE_BUFFERING ==
-                getMediaControllerPlaybackState(mMediaController)) {
-            final String pkg = mMediaController.getPackageName();
-            for (int i = 0; i < N; i++) {
-                final Entry entry = activeNotifications.get(i);
-                if (entry.notification.getPackageName().equals(pkg)) {
-                    tick(entry.notification, true, true, mMediaMetadata);
-                    break;
-                }
-            }
-        }
-    }
-
->>>>>>> 35a1811... DUI: Initial checkin for Oreo [5/7]
     private final OnChildLocationsChangedListener mOnChildLocationsChangedListener =
             new OnChildLocationsChangedListener() {
         @Override
@@ -5110,11 +5091,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public int getMaxKeyguardNotifications() {
         return getMaxKeyguardNotifications(false /* recompute */);
-    }
-
-    // TODO: Figure out way to remove these.
-    public NavigationBarView getNavigationBarView() {
-        return (mNavigationBar != null ? (NavigationBarView) mNavigationBar.getView() : null);
     }
 
     public View getNavigationBarWindow() {
