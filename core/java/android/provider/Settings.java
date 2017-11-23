@@ -4260,7 +4260,14 @@ public final class Settings {
          public static final String VOLUME_KEY_CURSOR_CONTROL = "volume_key_cursor_control";
 
         /**
-         * Whether to wake the screen with the volume keys, the value is boolean.
+         * Enable proxi check for wake keys - must be implemented in a device
+         * KeyHandler
+         * @hide
+         */
+        public static final String DEVICE_PROXI_CHECK_ENABLED = "device_proxi_check_enabled";
+
+        /**
+         * Whether to show the IME switcher in the status bar
          * @hide
          */
         public static final String VOLUME_WAKE_SCREEN = "volume_wake_screen";
