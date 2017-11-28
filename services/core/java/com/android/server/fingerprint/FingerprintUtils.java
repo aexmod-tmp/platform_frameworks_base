@@ -76,7 +76,9 @@ public class FingerprintUtils {
 
     public static void vibrateFingerprintError(Context context) {
         Vibrator vibrator = context.getSystemService(Vibrator.class);
-        if (vibrator != null) {
+	boolean FingerprintVibError = Settings.System.getIntForUser(context.getContentResolver(),
+            Settings.System.FINGERPRINT_ERROR_VIB, 1, UserHandle.USER_CURRENT) == 1;
+        if (vibrator != null && FingerprintVibError) {
             vibrator.vibrate(FP_ERROR_VIBRATE_PATTERN, -1);
         }
     }
