@@ -20,6 +20,7 @@ import android.util.Log;
 import com.android.systemui.plugins.qs.*;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.external.CustomTile;
+import com.android.systemui.qs.tiles.AdbOverNetworkTile;
 import com.android.systemui.qs.tiles.AirplaneModeTile;
 import com.android.systemui.qs.tiles.BatterySaverTile;
 import com.android.systemui.qs.tiles.BluetoothTile;
@@ -38,10 +39,12 @@ import com.android.systemui.qs.tiles.LocationTile;
 import com.android.systemui.qs.tiles.NfcTile;
 import com.android.systemui.qs.tiles.NightDisplayTile;
 import com.android.systemui.qs.tiles.PictureInPictureTile;
+import com.android.systemui.qs.tiles.RebootTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.qs.tiles.ScreenrecordTile;
 import com.android.systemui.qs.tiles.ScreenshotTile;
 import com.android.systemui.qs.tiles.SoundTile;
+import com.android.systemui.qs.tiles.VolumeTile;
 import com.android.systemui.qs.tiles.UserTile;
 import com.android.systemui.qs.tiles.WifiTile;
 import com.android.systemui.qs.tiles.WorkModeTile;
@@ -66,6 +69,7 @@ public class QSFactoryImpl implements QSFactory {
         else if (tileSpec.equals("airplane")) return new AirplaneModeTile(mHost);
         else if (tileSpec.equals("work")) return new WorkModeTile(mHost);
         else if (tileSpec.equals("pip")) return new PictureInPictureTile(mHost);
+        else if (tileSpec.equals("reboot")) return new RebootTile(mHost);
         else if (tileSpec.equals("rotation")) return new RotationLockTile(mHost);
         else if (tileSpec.equals("flashlight")) return new FlashlightTile(mHost);
         else if (tileSpec.equals("location")) return new LocationTile(mHost);
@@ -81,6 +85,8 @@ public class QSFactoryImpl implements QSFactory {
         else if (tileSpec.equals("compass")) return new CompassTile(mHost);
         else if (tileSpec.equals("sound")) return new SoundTile(mHost);
         else if (tileSpec.equals("heads_up")) return new HeadsUpTile(mHost);
+        else if (tileSpec.equals("volume")) return new VolumeTile(mHost);
+        else if (tileSpec.equals("adb_network")) return new AdbOverNetworkTile(mHost);
         // Intent tiles.
         else if (tileSpec.startsWith(IntentTile.PREFIX)) return IntentTile.create(mHost, tileSpec);
         else if (tileSpec.startsWith(CustomTile.PREFIX)) return CustomTile.create(mHost, tileSpec);
