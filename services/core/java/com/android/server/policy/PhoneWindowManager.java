@@ -737,6 +737,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Behavior of Back button while in-call and screen on
     int mIncallBackBehavior;
 
+
+    // Haptic on action
+    boolean mHapticOnAction;
+
     Display mDisplay;
 
     private int mDisplayRotation;
@@ -1024,6 +1028,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.NAVIGATION_BAR_WIDTH), false, this,
+                    UserHandle.USER_ALL);
+	    resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.HAPTIC_ON_ACTION_KEY), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -2377,6 +2384,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.Secure.INCALL_BACK_BUTTON_BEHAVIOR,
                     Settings.Secure.INCALL_BACK_BUTTON_BEHAVIOR_DEFAULT,
                     UserHandle.USER_CURRENT);
+	     mHapticOnAction = (Settings.System.getIntForUser(resolver,
+                    Settings.System.HAPTIC_ON_ACTION_KEY, 0, 
+		    UserHandle.USER_CURRENT) == 1);
 
             // Configure wake gesture.
             boolean wakeGestureEnabledSetting = Settings.Secure.getIntForUser(resolver,
@@ -6146,6 +6156,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         boolean useHapticFeedback = down
+		&& (!mHapticOnAction)
                 && (policyFlags & WindowManagerPolicy.FLAG_VIRTUAL) != 0
                 && event.getRepeatCount() == 0
                 && !isHwKeysDisabled();
