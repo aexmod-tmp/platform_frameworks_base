@@ -4747,12 +4747,7 @@ public class Notification implements Parcelable
         private void processSmallIconColor(Icon smallIcon, RemoteViews contentView,
                 boolean ambient) {
             boolean colorable = !isLegacy() || getColorUtil().isGrayscaleIcon(mContext, smallIcon);
-            int color;
-            if (!mContext.getResources().getBoolean(R.bool.config_allowNotificationIconTextTinting)) {
-                color = ambient ? resolveAmbientColor() : mContext.getColor(R.color.notification_icon_default_color);
-            } else {
-                color = ambient ? resolveAmbientColor() : getPrimaryHighlightColor();
-            }
+            int color = ambient ? resolveAmbientColor() : getPrimaryHighlightColor();
             if (colorable) {
                 contentView.setDrawableParameters(R.id.icon, false, -1, color,
                         PorterDuff.Mode.SRC_ATOP, -1);
@@ -4771,7 +4766,7 @@ public class Notification implements Parcelable
             if (largeIcon != null && isLegacy()
                     && getColorUtil().isGrayscaleIcon(mContext, largeIcon)) {
                 // resolve color will fall back to the default when legacy
-                contentView.setDrawableParameters(R.id.icon, false, -1, resolveIconContrastColor(),
+                contentView.setDrawableParameters(R.id.icon, false, -1, resolveContrastColor(),
                         PorterDuff.Mode.SRC_ATOP, -1);
             }
         }
@@ -4782,23 +4777,7 @@ public class Notification implements Parcelable
             }
         }
 
-        int getSenderTextColor() {
-            return mContext.getColor(R.color.sender_text_color);
-        }
-
-        int resolveIconContrastColor() {
-            if (!mContext.getResources().getBoolean(R.bool.config_allowNotificationIconTextTinting)) {
-                return mContext.getColor(R.color.notification_icon_default_color);
-            } else {
-                return resolveContrastColor();
-            }
-        }
-
         int resolveContrastColor() {
-            if (!mContext.getResources().getBoolean(R.bool.config_allowNotificationIconTextTinting)) {
-                return mContext.getColor(R.color.notification_text_default_color);
-            }
-
             if (mCachedContrastColorIsFor == mN.color && mCachedContrastColor != COLOR_INVALID) {
                 return mCachedContrastColor;
             }
@@ -6059,7 +6038,7 @@ public class Notification implements Parcelable
                 sb.append(bidi.unicodeWrap(m.mSender),
                         makeFontColorSpan(colorize
                                 ? builder.getPrimaryTextColor()
-                                : builder.getSenderTextColor()),
+                                : Color.BLACK),
                         0 /* flags */);
             }
             CharSequence text = m.mText == null ? "" : m.mText;
