@@ -22,7 +22,6 @@ import static android.system.OsConstants.STDERR_FILENO;
 import static android.system.OsConstants.STDIN_FILENO;
 import static android.system.OsConstants.STDOUT_FILENO;
 
-import android.graphics.Typeface;
 import android.net.Credentials;
 import android.net.LocalSocket;
 import android.os.FactoryTest;
@@ -208,10 +207,6 @@ class ZygoteConnection {
                 Os.fcntlInt(childPipeFd, F_SETFD, 0);
                 fdsToIgnore = new int[] { childPipeFd.getInt$(), serverPipeFd.getInt$() };
             }
-
-            if (parsedArgs.refreshTheme) {
-                Typeface.recreateDefaults();
-             }
 
             /**
              * In order to avoid leaking descriptors to the Zygote child,
@@ -428,9 +423,6 @@ class ZygoteConnection {
          */
         String appDataDir;
 
-        /** from --refresh_theme */
-        boolean refreshTheme;
-
         /**
          * Whether to preload a package, with the package path in the remainingArgs.
          */
@@ -611,8 +603,6 @@ class ZygoteConnection {
                     preloadPackageCacheKey = args[++curArg];
                 } else if (arg.equals("--preload-default")) {
                     preloadDefault = true;
-                } else if (arg.equals("--refresh_theme")) {
-                    refreshTheme = true;
                 } else {
                     break;
                 }
