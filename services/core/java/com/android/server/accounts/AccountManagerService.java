@@ -2960,13 +2960,9 @@ public class AccountManagerService
                              * have users launching arbitrary activities by tricking users to
                              * interact with malicious notifications.
                              */
-                            if (!checkKeyIntent(
+			    checkKeyIntent(
                                     Binder.getCallingUid(),
-                                    intent)) {
-                                onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
-                                        "invalid intent in bundle returned");
-                                return;
-                            }
+                                    intent);
                             doNotification(
                                     mAccounts,
                                     account,
@@ -3362,13 +3358,9 @@ public class AccountManagerService
             Intent intent = null;
             if (result != null
                     && (intent = result.getParcelable(AccountManager.KEY_INTENT)) != null) {
-                if (!checkKeyIntent(
+		checkKeyIntent(
                         Binder.getCallingUid(),
-                        intent)) {
-                    onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
-                            "invalid intent in bundle returned");
-                    return;
-                }
+                        intent);
             }
             IAccountManagerResponse response;
             if (mExpectActivityLaunch && result != null
@@ -4716,14 +4708,17 @@ public class AccountManagerService
          * into launching arbitrary intents on the device via by tricking to click authenticator
          * supplied entries in the system Settings app.
          */
-        protected boolean checkKeyIntent(int authUid, Intent intent) {
+	protected void checkKeyIntent(
+                int authUid,
+                Intent intent) throws SecurityException {
+            intent.setFlags(intent.getFlags() & ~(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                    | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION));
             long bid = Binder.clearCallingIdentity();
             try {
                 PackageManager pm = mContext.getPackageManager();
                 ResolveInfo resolveInfo = pm.resolveActivityAsUser(intent, 0, mAccounts.userId);
-                if (resolveInfo == null) {
-                    return false;
-                }
                 ActivityInfo targetActivityInfo = resolveInfo.activityInfo;
                 int targetUid = targetActivityInfo.applicationInfo.uid;
                 if (!isExportedSystemActivity(targetActivityInfo)
@@ -4733,10 +4728,9 @@ public class AccountManagerService
                     String activityName = targetActivityInfo.name;
                     String tmpl = "KEY_INTENT resolved to an Activity (%s) in a package (%s) that "
                             + "does not share a signature with the supplying authenticator (%s).";
-                    Log.e(TAG, String.format(tmpl, activityName, pkgName, mAccountType));
-                    return false;
+                    throw new SecurityException(
+                            String.format(tmpl, activityName, pkgName, mAccountType));
                 }
-                return true;
             } finally {
                 Binder.restoreCallingIdentity(bid);
             }
@@ -4886,13 +4880,9 @@ public class AccountManagerService
             }
             if (result != null
                     && (intent = result.getParcelable(AccountManager.KEY_INTENT)) != null) {
-                if (!checkKeyIntent(
+		checkKeyIntent(
                         Binder.getCallingUid(),
-                        intent)) {
-                    onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
-                            "invalid intent in bundle returned");
-                    return;
-                }
+                        intent);
             }
             if (result != null
                     && !TextUtils.isEmpty(result.getString(AccountManager.KEY_AUTHTOKEN))) {
