@@ -72,9 +72,4 @@ interface IPowerManager
     void setAttentionLight(boolean on, int color);
 
     void wakeUpWithProximityCheck(long time, String reason, String opPackageName);
-    // blocked wakelock support
-    String getSeenWakeLocks();
-
-    // update the uids being synchronized by network socket request manager
-    void updateBlockedUids(int uid, boolean isBlocked);
 }
