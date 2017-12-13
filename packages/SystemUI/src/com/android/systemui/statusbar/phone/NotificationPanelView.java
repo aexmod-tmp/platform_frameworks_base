@@ -259,9 +259,6 @@ public class NotificationPanelView extends PanelView implements
         mPowerManager = context.getSystemService(PowerManager.class);
 
         mSettingsObserver = new SettingsObserver(mHandler);
-
-        mQsOverscrollExpansionEnabled =
-                getResources().getBoolean(R.bool.config_enableQuickSettingsOverscrollExpansion);
     }
 
     public void setStatusBar(StatusBar bar) {
