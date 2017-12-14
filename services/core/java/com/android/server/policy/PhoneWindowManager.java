@@ -1435,15 +1435,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private boolean isDozeMode() {
-        IDreamManager dreamManager = getDreamManager();
-        try {
-            if (dreamManager != null && dreamManager.isDozing()) {
-                return true;
-            }
-        } catch (RemoteException e) {
-            return false;
-        }
-        return false;
+        return mDisplay.getState() == Display.STATE_DOZE;
     }
 
     private void interceptPowerKeyUp(KeyEvent event, boolean interactive, boolean canceled) {
