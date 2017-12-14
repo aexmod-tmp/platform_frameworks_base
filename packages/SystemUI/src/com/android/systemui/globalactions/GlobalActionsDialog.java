@@ -20,7 +20,7 @@ import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.EmergencyAffordanceManager;
-import com.android.internal.util.nitrogen.NitrogenUtils;
+import com.android.internal.util.aospextended.AEXUtils;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.widget.LockPatternUtils;
@@ -506,7 +506,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
             try {
                  Thread.sleep(1000); //1s
             } catch (InterruptedException ie) {}
-            NitrogenUtils.takeScreenshot(true);
+            AEXUtils.takeScreenshot(true);
         }
 
 
@@ -517,7 +517,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
             try {
                  Thread.sleep(1000); //1s
             } catch (InterruptedException ie) {}
-            NitrogenUtils.takeScreenshot(false);
+            AEXUtils.takeScreenshot(false);
             return true;
         }
 
