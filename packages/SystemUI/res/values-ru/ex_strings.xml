@@ -52,4 +52,6 @@
     <string name="battery_level_good_title">Оптимальный уровень батареи</string>
     <string name="notification_channel_charge_alert">Оптимальный уровень заряда батареи</string>
 
+    <string name="status_bar_roaming">Роуминг</string>
+
 </resources>
