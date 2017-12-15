@@ -878,7 +878,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mClearedBecauseOfForceShow;
     private boolean mTopWindowIsKeyguard;
 
-    private static final int MSG_DISPATCH_VOLKEY_WITH_WAKE_LOCK = 27;
+    private static final int MSG_DISPATCH_VOLKEY_WITH_WAKE_LOCK = 28;
 
     private class PolicyHandler extends Handler {
         @Override
@@ -2555,7 +2555,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             mVolumeMusicControl = Settings.System.getIntForUser(resolver,
                     Settings.System.VOLUME_BUTTON_MUSIC_CONTROL, 1,
-                    UserHandle.USER_CURRENT);
+                    UserHandle.USER_CURRENT) != 0;
 
         }
 
