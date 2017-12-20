@@ -5164,7 +5164,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         final boolean inflated = mStackScroller != null;
 
         int userThemeSetting = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.SYSTEM_UI_THEME, 0, mCurrentUserId);
+                Settings.System.SYSTEM_THEME_STYLE, 0, mCurrentUserId);
         boolean useDarkTheme = false;
         if (userThemeSetting == 0) {
             // The system wallpaper defines if QS should be light or dark.
@@ -6389,6 +6389,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.QS_FOOTER_WARNINGS),
                     false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SYSTEM_THEME_STYLE),
+                    false, this, UserHandle.USER_ALL);
             update();
         }
 
@@ -6426,6 +6429,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             setHeadsUpStoplist();
             setHeadsUpBlacklist();
             setQsPanelOptions();
+            updateTheme();
         }
     }
 
