@@ -40,6 +40,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.Vibrator;
+import android.os.VibrationEffect;
 import android.provider.Settings;
 import android.support.annotation.VisibleForTesting;
 import android.util.Slog;
@@ -91,6 +92,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private final Context mContext;
     private final NotificationManager mNoMan;
     private final PowerManager mPowerMan;
+    private final AudioManager mAudioMan;
+    private final Vibrator mVibrator;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Receiver mReceiver = new Receiver();
     private final Intent mOpenBatterySettings = settings(Intent.ACTION_POWER_USAGE_SUMMARY);
@@ -116,11 +119,12 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private static final String CHARGE_NOTIF_CHANNEL = "CHARGELEV";
     private long mLastTimeTriggered = 0;
 
-    public PowerNotificationWarnings(Context context, NotificationManager notificationManager,
-            StatusBar statusBar) {
+    public PowerNotificationWarnings(Context context) {
         mContext = context;
         mNoMan = mContext.getSystemService(NotificationManager.class);
         mPowerMan = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+	mAudioMan = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+        mVibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         mReceiver.init();
 
         final NotificationChannel chargeChannel = new NotificationChannel(
@@ -427,7 +431,16 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         if (DEBUG) {
             Slog.d(TAG, "notifyBatteryPlugged");
         }
+        playBatteryPluggedVibration();
         playBatteryPluggedSound();
+    }
+
+     public void notifyBatteryUnplugged() {
+        if (DEBUG) {
+            Slog.d(TAG, "notifyBatteryUnplugged");
+        }
+
+        playBatteryPluggedVibration();
     }
 
     private void playBatteryPluggedSound() {
@@ -461,6 +474,20 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             Vibrator vibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
             vibrator.vibrate(new long[]{0, 200L}, -1 /* repeat */);
         }
+    }
+
+    private void playBatteryPluggedVibration() {
+        if (Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.VIBRATION_ON_CHARGE_STATE_CHANGED, 1,
+                UserHandle.USER_CURRENT) == 0) {
+            return;
+        }
+
+        if (DEBUG) {
+            Slog.d(TAG, "playing battery plugged vibration");
+        }
+
+        mVibrator.vibrate(VibrationEffect.createOneShot(150, VibrationEffect.DEFAULT_AMPLITUDE));
     }
 
     @Override
