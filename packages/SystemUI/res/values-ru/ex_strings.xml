@@ -25,6 +25,13 @@
     <!-- Caffeine Tile -->
     <string name="quick_settings_caffeine_label">Кофеин</string>
 
+    <string name="statusbar_items_title">Элементы статусбара</string>
+
+    <!-- 4G LTE switch -->
+    <string name="show_fourg_title">4G вместо LTE</string>
+    <string name="show_fourg_summary">Заменить значок LTE на 4G в статусбаре</string>
+
+
     <string name="global_action_restart_advanced">Расшир. перезагрузка</string>
     <string name="global_action_screenrecord">Запись экрана</string>
 
@@ -40,5 +47,9 @@
     <!-- Screen record notification error title -->
     <string name="screenrecord_notif_error">Невозможно записать экран</string>
     <string name="notification_channel_screenrecord">Запись экрана</string>
+
+    <string name="alert_on_charged_level">Можно отключить зарядку ( ">"<xliff:g id="percentage">%s</xliff:g> )</string>
+    <string name="battery_level_good_title">Оптимальный уровень батареи</string>
+    <string name="notification_channel_charge_alert">Оптимальный уровень заряда батареи</string>
 
 </resources>
