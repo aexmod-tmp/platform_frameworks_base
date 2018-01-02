@@ -3109,6 +3109,17 @@ public class StatusBar extends SystemUI implements DemoMode,
         return themeInfo != null && themeInfo.isEnabled();
     }
 
+    public boolean isUsingBlackTheme() {
+        OverlayInfo themeInfo = null;
+        try {
+            themeInfo = mOverlayManager.getOverlayInfo("com.android.system.theme.black",
+                    mCurrentUserId);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        return themeInfo != null && themeInfo.isEnabled();
+    }
+
     @Nullable
     public View getAmbientIndicationContainer() {
         return mAmbientIndicationContainer;
@@ -5165,6 +5176,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         int userThemeSetting = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.SYSTEM_THEME_STYLE, 0, mCurrentUserId);
+        boolean useBlackTheme = false;
         boolean useDarkTheme = false;
         if (userThemeSetting == 0) {
             // The system wallpaper defines if QS should be light or dark.
@@ -5174,6 +5186,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     && (systemColors.getColorHints() & WallpaperColors.HINT_SUPPORTS_DARK_THEME) != 0;
         } else {
             useDarkTheme = userThemeSetting == 2;
+            useBlackTheme = userThemeSetting == 3;
         }
         if (isUsingDarkTheme() != useDarkTheme) {
             try {
@@ -5181,6 +5194,16 @@ public class StatusBar extends SystemUI implements DemoMode,
                         useDarkTheme, mCurrentUserId);
                 mOverlayManager.setEnabled("com.android.settings.theme.dark",
                         useDarkTheme, mCurrentUserId);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Can't change theme", e);
+            }
+        }
+        if (isUsingBlackTheme() != useBlackTheme) {
+            try {
+                mOverlayManager.setEnabled("com.android.system.theme.black",
+                        useBlackTheme, mCurrentUserId);
+                mOverlayManager.setEnabled("com.android.settings.theme.black",
+                        useBlackTheme, mCurrentUserId);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't change theme", e);
             }
