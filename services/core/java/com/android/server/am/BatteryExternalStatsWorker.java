@@ -21,6 +21,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiActivityEnergyInfo;
+import android.net.wifi.WifiManager;
 import android.os.BatteryStats;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -73,6 +74,8 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
 
     private final Context mContext;
     private final BatteryStatsImpl mStats;
+
+    private WifiManager mWifi;
 
     @GuardedBy("this")
     private int mUpdateFlags = 0;
@@ -209,6 +212,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         SynchronousResultReceiver bluetoothReceiver = null;
         SynchronousResultReceiver modemReceiver = null;
 
+        Slog.e(TAG, "updateExternalStatsLocked reason:" + reason + " flag:" + updateFlags);
         if ((updateFlags & BatteryStatsImpl.ExternalStatsSync.UPDATE_WIFI) != 0) {
             // We were asked to fetch WiFi data.
             if (mWifiManager == null) {
@@ -280,12 +284,18 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         // WiFi and Modem state are updated without the mStats lock held, because they
         // do some network stats retrieval before internally grabbing the mStats lock.
 
-        if (wifiInfo != null && wifiInfo.isValid()) {
-            mStats.updateWifiState(extractDeltaLocked(wifiInfo));
+        if (wifiInfo != null) {
+            if (wifiInfo.isValid()) {
+                mStats.updateWifiState(extractDeltaLocked(wifiInfo));
+            } else {
+                Slog.e(TAG, "wifi info is invalid: " + wifiInfo);
+            }
         } else {
-            // wifiInfo can be null if link layer statistics feature(optional) is not supported.
-            // In this case, updateWifiState is called to update the tx and rx packets statistics.
-            mStats.updateWifiState(null);
+                mWifi = (WifiManager) mContext.getSystemService(mContext.WIFI_SERVICE);
+                if (mWifi != null && !mWifi.isEnhancedPowerReportingSupported()) {
+                    mStats.updateWifiState(null);
+                }
+                Slog.e(TAG, "wifi info is null ");
         }
 
         if (modemInfo != null) {
