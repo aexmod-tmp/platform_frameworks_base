@@ -110,7 +110,7 @@ public class AEXUtils {
         }
     }
 
-public static boolean isPackageInstalled(Context context, String pkg, boolean ignoreState) {
+    public static boolean isPackageInstalled(Context context, String pkg, boolean ignoreState) {
         if (pkg != null) {
             try {
                 PackageInfo pi = context.getPackageManager().getPackageInfo(pkg, 0);
@@ -129,6 +129,11 @@ public static boolean isPackageInstalled(Context context, String pkg, boolean ig
         return isPackageInstalled(context, pkg, true);
     }
 
+    // Check to see if device supports an alterative ambient display package
+    public static boolean hasAltAmbientDisplay(Context context) {
+        return context.getResources().getBoolean(com.android.internal.R.bool.config_alt_ambient_display);
+    }
+
     private static final class FireActions {
         private static IStatusBarService mStatusBarService = null;
         private static IStatusBarService getStatusBarService() {
@@ -141,8 +146,9 @@ public static boolean isPackageInstalled(Context context, String pkg, boolean ig
             }
         }
 
-        public static void toggleCameraFlash() {
-            IStatusBarService service = getStatusBarService();
+
+    public static void toggleCameraFlash() {
+        IStatusBarService service = getStatusBarService();
             if (service != null) {
                 try {
                     service.toggleCameraFlash();
