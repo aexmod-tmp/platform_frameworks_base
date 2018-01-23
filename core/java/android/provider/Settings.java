@@ -6420,6 +6420,13 @@ public final class Settings {
         public static final String FLING_RIPPLE_COLOR = "fling_ripple_color";
 
         /**
+         * Pulse accent color
+         *
+         * @hide
+         */
+        public static final String PULSE_ACCENT_COLOR_ENABLED = "pulse_accent_color_enabled";
+
+        /**
          * Fling pulse lavalamp psychedelic colors
          *
          * @hide
