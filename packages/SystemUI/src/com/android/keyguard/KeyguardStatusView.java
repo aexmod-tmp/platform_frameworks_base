@@ -93,6 +93,8 @@ public class KeyguardStatusView extends GridLayout implements
 
 
     private View mWeatherView;
+    private View weatherPanel;
+    private TextView noWeatherInfo;
     private TextView mWeatherCity;
     private ImageView mWeatherConditionImage;
     private TextView mWeatherCurrentTemp;
@@ -103,6 +105,7 @@ public class KeyguardStatusView extends GridLayout implements
     private boolean mShowWeather;
     private boolean mShowConditionIcon;
     private boolean mShowLocation;
+    private boolean mShowAmbientWeather;
 
     private SettingsObserver mSettingsObserver;
 
@@ -199,15 +202,18 @@ public class KeyguardStatusView extends GridLayout implements
         mOwnerInfo = findViewById(R.id.owner_info);
         mBatteryDoze = findViewById(R.id.battery_doze);
         mKeyguardStatusArea = findViewById(R.id.keyguard_status_area);
-        mVisibleInDoze = new View[]{mBatteryDoze, mClockView, mKeyguardStatusArea};
         mTextColor = mClockView.getCurrentTextColor();
         mDateTextColor = mDateView.getCurrentTextColor();
         mAlarmTextColor = mAlarmStatusView.getCurrentTextColor();
         mWeatherView = findViewById(R.id.keyguard_weather_view);
+        weatherPanel = findViewById(R.id.weather_panel);
+        noWeatherInfo = (TextView) findViewById(R.id.no_weather_info_text);
         mWeatherCity = (TextView) findViewById(R.id.city);
-        mWeatherConditionImage = (ImageView) findViewById(R.id.weather_image);
+        mWeatherConditionImage = (ImageView) findViewById(R.id.ls_weather_image);
         mWeatherCurrentTemp = (TextView) findViewById(R.id.current_temp);
         mWeatherConditionText = (TextView) findViewById(R.id.condition);
+
+        mVisibleInDoze = new View[]{mBatteryDoze, mClockView, mKeyguardStatusArea, mWeatherView};
 
         boolean shouldMarquee = KeyguardUpdateMonitor.getInstance(mContext).isDeviceInteractive();
         setEnableMarquee(shouldMarquee);
@@ -267,7 +273,11 @@ public class KeyguardStatusView extends GridLayout implements
     }
 
     public int getClockBottom() {
-        return mKeyguardStatusArea.getBottom();
+        if (mShowWeather && mShowAmbientWeather && mWeatherClient.isOmniJawsEnabled()) {
+            return mWeatherView.getBottom();
+        } else {
+            return mKeyguardStatusArea.getBottom();
+        }
     }
 
     public float getClockTextSize() {
@@ -329,6 +339,7 @@ public class KeyguardStatusView extends GridLayout implements
         }
         return info;
     }
+
     @Override
     public void weatherUpdated() {
         queryAndUpdateWeather();
@@ -378,8 +389,6 @@ public class KeyguardStatusView extends GridLayout implements
     }
 
     private void updateSettings() {
-        View weatherPanel = findViewById(R.id.weather_panel);
-        TextView noWeatherInfo = (TextView) findViewById(R.id.no_weather_info_text);
         boolean mWeatherEnabled = mWeatherClient.isOmniJawsEnabled();
 
         if (mWeatherView == null || weatherPanel == null)
@@ -398,9 +407,9 @@ public class KeyguardStatusView extends GridLayout implements
             mWeatherConditionText.setVisibility(View.GONE);
         }
         if (mWeatherEnabled && mShowWeather && mShowConditionIcon &&
-                mWeatherConditionImage != null) {
+                mWeatherConditionImage != null && mWeatherConditionImage.getDrawable() != null) {
             mWeatherConditionImage.setVisibility(View.VISIBLE);
-        } else if (mShowWeather && mShowConditionIcon &&
+        } else if (!mWeatherEnabled && mShowWeather && mShowConditionIcon &&
                 mWeatherConditionImage != null) {
             mWeatherConditionImage.setImageDrawable(mContext
                 .getResources().getDrawable(R.drawable.keyguard_weather_default_off));
@@ -491,8 +500,14 @@ public class KeyguardStatusView extends GridLayout implements
             }
             child.setAlpha(dark ? 0 : 1);
         }
-        if (mOwnerInfo != null) {
-            mOwnerInfo.setAlpha(dark ? 0 : 1);
+        if (!mShowAmbientWeather || !mShowWeather || !mWeatherClient.isOmniJawsEnabled()) {
+            mWeatherView.setAlpha(dark ? 0 : 1);
+            weatherPanel.setAlpha(dark ? 0 : 1);
+            noWeatherInfo.setAlpha(dark ? 0 : 1);
+            mWeatherCity.setAlpha(dark ? 0 : 1);
+            mWeatherConditionImage.setAlpha(dark ? 0 : 1);
+            mWeatherCurrentTemp.setAlpha(dark ? 0 : 1);
+            mWeatherConditionText.setAlpha(dark ? 0 : 1);
         }
 
         updateDozeVisibleViews();
@@ -538,10 +553,14 @@ public class KeyguardStatusView extends GridLayout implements
             resolver.registerContentObserver(Settings.System.getUriFor(
                   Settings.System.LOCK_SCREEN_SHOW_WEATHER_LOCATION), false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.LOCK_SCREEN_AMBIENT_WEATHER), false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
                   Settings.System.OMNIJAWS_WEATHER_ICON_PACK), false, this, UserHandle.USER_ALL);
 
             mShowWeather = Settings.System.getIntForUser(resolver,
                   Settings.System.LOCK_SCREEN_SHOW_WEATHER, 0, UserHandle.USER_CURRENT) == 1;
+            mShowAmbientWeather = Settings.System.getIntForUser(resolver,
+                  Settings.System.LOCK_SCREEN_AMBIENT_WEATHER, 0, UserHandle.USER_CURRENT) == 1;
             mShowConditionIcon = Settings.System.getIntForUser(resolver,
                   Settings.System.LOCK_SCREEN_WEATHER_CONDITION_ICON, 1, UserHandle.USER_CURRENT) == 1;
             mShowLocation = Settings.System.getIntForUser(resolver,
@@ -573,6 +592,10 @@ public class KeyguardStatusView extends GridLayout implements
                 mShowLocation = Settings.System.getIntForUser(resolver,
                     Settings.System.LOCK_SCREEN_SHOW_WEATHER_LOCATION, 1, UserHandle.USER_CURRENT) == 1;
                 updateSettings();
+            } else if (uri.equals(Settings.System.getUriFor(
+                   Settings.System.LOCK_SCREEN_AMBIENT_WEATHER))) {
+                mShowAmbientWeather = Settings.System.getIntForUser(resolver,
+                    Settings.System.LOCK_SCREEN_AMBIENT_WEATHER, 0, UserHandle.USER_CURRENT) == 1;
             } else if (uri.equals(Settings.System.getUriFor(
                    Settings.System.OMNIJAWS_WEATHER_ICON_PACK))) {
                 queryAndUpdateWeather();

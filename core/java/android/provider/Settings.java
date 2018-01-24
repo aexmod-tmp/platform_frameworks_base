@@ -4537,6 +4537,12 @@ public final class Settings {
         public static final String QS_QUICKBAR_SCROLL_ENABLED = "qs_quickbar_scroll_enabled";
 
         /**
+         * Whether to show the weather info on doze
+         * @hide
+         */
+        public static final String LOCK_SCREEN_AMBIENT_WEATHER = "lock_screen_ambient_weather";
+
+        /**
          * @hide
          */
         public static final String OMNIJAWS_WEATHER_ICON_PACK = "omnijaws_weather_icon_pack";
