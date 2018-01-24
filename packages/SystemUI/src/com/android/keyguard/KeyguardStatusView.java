@@ -34,6 +34,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.Settings;
+import android.service.dreams.DreamService;
+import android.service.dreams.IDreamManager;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
@@ -46,6 +48,8 @@ import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.TextClock;
 import android.widget.TextView;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
@@ -356,6 +360,23 @@ public class KeyguardStatusView extends GridLayout implements
         return false;
     }
 
+    private boolean isDozeMode() {
+        IDreamManager dreamManager = getDreamManager();
+        try {
+            if (dreamManager != null && dreamManager.isDozing()) {
+                return true;
+            }
+        } catch (RemoteException e) {
+            return false;
+        }
+        return false;
+    }
+
+    static IDreamManager getDreamManager() {
+        return IDreamManager.Stub.asInterface(
+                ServiceManager.checkService(DreamService.DREAM_SERVICE));
+    }
+
     private void updateSettings() {
         View weatherPanel = findViewById(R.id.weather_panel);
         TextView noWeatherInfo = (TextView) findViewById(R.id.no_weather_info_text);
@@ -364,7 +385,7 @@ public class KeyguardStatusView extends GridLayout implements
         if (mWeatherView == null || weatherPanel == null)
             return;
 
-        mWeatherView.setVisibility(mShowWeather ? View.VISIBLE : View.GONE);
+        mWeatherView.setVisibility(mShowWeather && !isDozeMode() ? View.VISIBLE : View.GONE);
 
         if (noWeatherInfo != null) {
             noWeatherInfo.setVisibility(mShowWeather && !mWeatherClient.isOmniJawsEnabled() ?
