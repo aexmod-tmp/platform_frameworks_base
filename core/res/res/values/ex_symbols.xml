@@ -76,8 +76,6 @@
   <java-symbol type="integer" name="config_sms_authorization_timeout_ms" />
   <java-symbol type="bool" name="config_sms_authorization_enabled" />
 
-  <java-symbol type="integer" name="config_flashlightProximityTimeout" />
-
   <!-- Pocket Lock -->
   <java-symbol type="layout" name="pocket_lock_view_layout" />
   <java-symbol type="id" name="pocket_hint_container" />
@@ -90,4 +88,3 @@
     <!-- Whether device supports an alt. ambient display -->
   <java-symbol type="bool" name="config_alt_ambient_display"/>
 </resources>
-
