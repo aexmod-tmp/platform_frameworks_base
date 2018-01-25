@@ -1146,7 +1146,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mSubscriptionManager = SubscriptionManager.from(context);
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
         mStrongAuthTracker = new StrongAuthTracker(context);
-
         // Since device can't be un-provisioned, we only need to register a content observer
         // to update mDeviceProvisioned when we are...
         if (!mDeviceProvisioned) {
@@ -1297,6 +1296,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean isDeviceProvisionedInSettingsDb() {
         return Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.DEVICE_PROVISIONED, 0) != 0;
+    }
+
+    public boolean isFaceUnlockBypass() {
+	return Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.G_FACE_UNLOCK_BYPASS, 0) != 0;
     }
 
     private void watchForDeviceProvisioning() {
