@@ -18,9 +18,12 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="accessibility_data_connection_hspap">HSPA+</string>
     <string name="global_action_restart_advanced">高级重启</string>
     <string name="global_action_restart_recovery">恢复模式</string>
     <string name="global_action_restart_bootloader">引导模式</string>
+	<string name="global_action_restart_ui">系统界面</string>
+    <string name="global_action_restart_soft">快速重启</string>
     <string name="global_action_screenrecord">录屏</string>
 
     <string name="summary_empty" translatable="false"></string>
@@ -77,9 +80,9 @@
     <string name="lte_off">LTE OFF</string>
 
     <string name="alert_on_charged_level">你可以断开充电器 ( ">"<xliff:g id="percentage">%s</xliff:g> )</string>
-    <string name="battery_level_good_title">最佳的电池水平</string>
+    <string name="battery_level_good_title">最佳的电池级别</string>
     <string name="battery_level_good_sound" translatable="false">/system/media/audio/ui/GoodBattery.ogg</string>
-    <string name="notification_channel_charge_alert">最佳的电池充电水平</string>
+    <string name="notification_channel_charge_alert">最佳的电池充电级别</string>
 
     <string name="status_bar_vpn">VPN</string>
     <string name="status_bar_roaming">漫游</string>
@@ -104,7 +107,7 @@
     <string name="accessibility_quick_settings_heads_up_changed_on">Heads up turned on.</string>
 
     <!-- Heads up snooze toast -->
-    <string name="heads_up_snooze_message_one_minute"><xliff:g id="string">%s</xliff:g> - 禁用通知 1 分钟.</string>
+    <string name="heads_up_snooze_message_one_minute"><xliff:g id="string">%s</xliff:g> - 禁用通知一分钟.</string>
     <string name="heads_up_snooze_message"><xliff:g id="string">%s</xliff:g> - 禁用通知 <xliff:g id="number">%d</xliff:g> 分钟.</string>
 
 
@@ -119,7 +122,7 @@
     <!-- ADB over network QS tile -->
     <string name="quick_settings_network_adb_enabled_label">开启</string>
     <string name="quick_settings_network_adb_disabled_label">关闭</string>
-    <string name="quick_settings_network_adb_label">ADB 网络</string>
+    <string name="quick_settings_network_adb_label">ADB 调试网络</string>
     <string name="quick_settings_network_adb_toast">USB 调试未开启</string>
 
      <!-- Sync QS Tile -->
@@ -152,5 +155,11 @@
     <string name="quick_settings_compass_SW">SW</string>
     <string name="quick_settings_compass_W">W</string>
     <string name="quick_settings_compass_NW">NW</string>
+
+	 <!-- Screenshot QS tile -->
+    <string name="quick_settings_screenrecord_label">录屏</string>
+    <string name="quick_settings_screenrecord_lq_label">录屏 LQ</string>
+    <string name="quick_settings_screenrecord_mq_label">录屏 MQ</string>
+    <string name="quick_settings_screenrecord_hq_label">录屏 HQ</string>
 
 </resources>
