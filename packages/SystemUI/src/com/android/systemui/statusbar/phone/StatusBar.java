@@ -5265,17 +5265,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         }
 
-        if (isUsingExtendedTheme() != useExtendedTheme) {
-            try {
-                mOverlayManager.setEnabled("com.android.system.theme.extended",
-                        useExtendedTheme, mCurrentUserId);
-                mOverlayManager.setEnabled("com.android.dui.theme.extended",
-                        useDarkTheme, mCurrentUserId);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Can't change theme", e);
-            }
-        }
-
         // Lock wallpaper defines the color of the majority of the views, hence we'll use it
         // to set our default theme.
         final boolean lockDarkText = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK, true
