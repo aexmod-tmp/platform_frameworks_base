@@ -13,10 +13,6 @@ cc_defaults {
         },
     },
 
-    lto: {
-        thin: true,
-    },
-
     cflags: [
         "-DEGL_EGLEXT_PROTOTYPES",
         "-DGL_GLEXT_PROTOTYPES",
