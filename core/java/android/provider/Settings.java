@@ -4669,7 +4669,15 @@ public final class Settings {
         public static final String G_FACE_UNLOCK_BYPASS = "g_face_unlock_bypass";
 
         /**
+         * Select various accents to go along with system themes
+         *
+         * @hide
+         */
+        public static final String ACCENT_PICKER = "accent_picker";
+
+        /**
          * Manual override menu button behavior on lockscreen
+         *
          * @hide
         **/
 
