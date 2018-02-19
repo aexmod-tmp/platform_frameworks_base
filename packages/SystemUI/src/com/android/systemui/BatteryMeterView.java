@@ -86,6 +86,11 @@ public class BatteryMeterView extends LinearLayout implements
 
     private boolean mAttached;
 
+    private boolean mClockEnabled;
+    private int mClockStyle = STYLE_CLOCK_RIGHT;
+    public static final int STYLE_CLOCK_RIGHT = 0;
+    public static final int STYLE_CLOCK_LEFT = 1;
+
     public BatteryMeterView(Context context) {
         this(context, null, 0);
     }
@@ -207,6 +212,10 @@ public class BatteryMeterView extends LinearLayout implements
                 || mStyle == BatteryMeterDrawableBase.BATTERY_STYLE_DOTTED_CIRCLE;
     }
 
+    private boolean isRightClock() {
+        return mClockEnabled && mClockStyle == STYLE_CLOCK_RIGHT;
+    }
+
     @Override
     public void onPowerSaveChanged(boolean isPowerSave) {
         mDrawable.setPowerSave(isPowerSave);
@@ -279,7 +288,8 @@ public class BatteryMeterView extends LinearLayout implements
 
         LinearLayout.LayoutParams scaledLayoutParams = new LinearLayout.LayoutParams(
                 (int) (batteryWidth * iconScaleFactor), (int) (batteryHeight * iconScaleFactor));
-        scaledLayoutParams.setMargins(0, 0, 0, marginBottom);
+        scaledLayoutParams.setMargins(0, 0, isCircleBattery() && isRightClock()
+                ? mEndPadding : 0, marginBottom);
 
         if (mBatteryIconView != null) {
             mBatteryIconView.setLayoutParams(scaledLayoutParams);
@@ -371,6 +381,10 @@ public class BatteryMeterView extends LinearLayout implements
                 SHOW_BATTERY_PERCENT, 1, mUser);
         mStyle = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 STATUS_BAR_BATTERY_STYLE, BatteryMeterDrawableBase.BATTERY_STYLE_PORTRAIT, mUser);
+        mClockStyle = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.STATUSBAR_CLOCK_STYLE, STYLE_CLOCK_RIGHT, mUser);
+        mClockEnabled = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.STATUS_BAR_CLOCK, 1, mUser) == 1;
         if (fromObserver && mAttached) {
             updateBatteryStyle();
         }
