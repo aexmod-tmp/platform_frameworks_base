@@ -4645,6 +4645,13 @@ public final class Settings {
 
         public static final String G_FACE_UNLOCK_BYPASS = "g_face_unlock_bypass";
 
+        /**
+         * Manual override menu button behavior on lockscreen
+         * @hide
+        **/
+
+        public static final String HW_MENU_KEY_LOCKSCREEN = "hw_menu_key_lockscreen";
+
 
         /**
          * @hide

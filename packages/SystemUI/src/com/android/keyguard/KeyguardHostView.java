@@ -431,7 +431,8 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
         final boolean configDisabled = res.getBoolean(R.bool.config_disableMenuKeyInLockScreen);
         final boolean isTestHarness = ActivityManager.isRunningInTestHarness();
         final boolean fileOverride = (new File(ENABLE_MENU_KEY_FILE)).exists();
-        return !configDisabled || isTestHarness || fileOverride;
+        return mKeyguardUpdateMonitor.hwMenuKeyLockscreen();
+	//!configDisabled || isTestHarness || fileOverride || mKeyguardUpdateMonitor.hwMenuKeyLockscreen();
     }
 
     public void setViewMediatorCallback(ViewMediatorCallback viewMediatorCallback) {

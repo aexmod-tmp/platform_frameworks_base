@@ -1303,6 +1303,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 Settings.System.G_FACE_UNLOCK_BYPASS, 0) != 0;
     }
 
+    public boolean hwMenuKeyLockscreen() {
+	return Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.HW_MENU_KEY_LOCKSCREEN, 0) != 0;
+    }
+
     private void watchForDeviceProvisioning() {
         mDeviceProvisionedObserver = new ContentObserver(mHandler) {
             @Override
