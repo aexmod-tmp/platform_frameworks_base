@@ -51,6 +51,12 @@ cc_defaults {
             cflags: ["-DUSE_HWC2"],
         },
     },
+
+    arch: {
+        arm: {
+            instruction_set: "arm",
+        },
+    },
 }
 
 cc_defaults {
@@ -254,7 +260,11 @@ cc_library {
         // If enabled, every GLES call is wrapped & error checked
         // Has moderate overhead
         //"hwui_enable_opengl_validation",
-],
+    ],
+
+    lto: {
+        thin: true,
+    },
 }
 
 // ------------------------
