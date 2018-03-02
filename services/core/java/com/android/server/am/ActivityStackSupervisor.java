@@ -3496,7 +3496,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // matches not on the specified display.
                 if (mTmpFindTaskResult.r != null) {
                     if (!mTmpFindTaskResult.matchedByRootAffinity) {
-                        if(mTmpFindTaskResult.r.state == ActivityState.DESTROYED ) {
+                        if(mTmpFindTaskResult.r.getState() == ActivityState.DESTROYED ) {
                             /*It's a new app launch */
                             acquireAppLaunchPerfLock(r);
                         }
