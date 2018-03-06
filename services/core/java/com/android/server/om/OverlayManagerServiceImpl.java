@@ -287,9 +287,11 @@ final class OverlayManagerServiceImpl {
         final PackageInfo targetPackage =
                 mPackageManager.getPackageInfo(overlayPackage.overlayTarget, userId);
 
-        mSettings.init(packageName, userId, overlayPackage.overlayTarget,
-                overlayPackage.applicationInfo.getBaseCodePath(), overlayPackage.isStaticOverlay,
-                overlayPackage.overlayPriority);
+        mSettings.init(packageName, userId,
+                        overlayPackage.overlayTarget,
+                        overlayPackage.applicationInfo.getBaseCodePath(),
+                        isPackageStaticOverlay(overlayPackage), overlayPackage.overlayPriority);
+
         try {
             if (updateState(targetPackage, overlayPackage, userId)) {
                 mListener.onOverlaysChanged(overlayPackage.overlayTarget, userId);
