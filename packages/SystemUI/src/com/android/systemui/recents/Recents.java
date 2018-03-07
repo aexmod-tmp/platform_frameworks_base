@@ -63,6 +63,8 @@ import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.slimrecent.icons.IconsHandler;
+import com.android.systemui.recents.misc.Utilities;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -125,6 +127,9 @@ public class Recents extends SystemUI
 
     // The set of runnables to run after binding to the system user's service.
     private final ArrayList<Runnable> mOnConnectRunnables = new ArrayList<>();
+
+    private IconsHandler mIconsHandler;
+    private Configuration mConfiguration;
 
     // Only for secondary users, this is the death handler for the binder from the system user
     private final IBinder.DeathRecipient mUserToSystemCallbacksDeathRcpt = new IBinder.DeathRecipient() {
@@ -210,12 +215,19 @@ public class Recents extends SystemUI
         getTaskLoader().evictAllCaches();
     }
 
+    public IconsHandler getIconsHandler() {
+        return mIconsHandler;
+    }
+
     @Override
     public void start() {
+        mIconsHandler = new IconsHandler(
+                mContext, R.dimen.recents_task_view_header_height_tablet_land, 1.0f);
         sDebugFlags = new RecentsDebugFlags(mContext);
         sSystemServicesProxy = SystemServicesProxy.getInstance(mContext);
         sConfiguration = new RecentsConfiguration(mContext);
-        sTaskLoader = new RecentsTaskLoader(mContext);
+        mConfiguration = new Configuration(Utilities.getAppConfiguration(mContext));
+        sTaskLoader = new RecentsTaskLoader(mContext, mIconsHandler);
         mHandler = new Handler();
         mImpl = new RecentsImpl(mContext);
 
@@ -589,6 +601,11 @@ public class Recents extends SystemUI
      */
     public void onConfigurationChanged(Configuration newConfig) {
         int currentUser = sSystemServicesProxy.getCurrentUser();
+        if (mConfiguration.densityDpi != newConfig.densityDpi) {
+            resetIconCache();
+            mIconsHandler.onDpiChanged(mContext);
+        }
+        mConfiguration.updateFrom(newConfig);
         if (sSystemServicesProxy.isSystemUser(currentUser)) {
             mImpl.onConfigurationChanged();
         } else {
