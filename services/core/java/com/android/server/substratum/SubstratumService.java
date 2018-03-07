@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2018 Projekt Development
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package com.android.server.substratum;
 
 import android.annotation.NonNull;
+import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -33,12 +34,15 @@ import android.content.pm.Signature;
 import android.content.res.AssetManager;
 import android.content.ServiceConnection;
 import android.content.substratum.ISubstratumService;
-import android.graphics.Typeface;
+import android.database.ContentObserver;
+import android.media.AudioManager;
 import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SELinux;
@@ -58,10 +62,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.Throwable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -134,8 +140,6 @@ public final class SubstratumService extends SystemService {
                 "Lock"),
         new Sound(SYSTEM_THEME_UI_SOUNDS_DIR.getAbsolutePath(), "/SoundsCache/ui/", "unlock_sound",
                 "Unlock"),
-        new Sound(SYSTEM_THEME_UI_SOUNDS_DIR.getAbsolutePath(), "/SoundsCache/ui/",
-                "low_battery_sound", "LowBattery"),
         new Sound(SYSTEM_THEME_ALARM_DIR.getAbsolutePath(), "/SoundsCache/alarms/", "alarm",
                 "alarm", RingtoneManager.TYPE_ALARM),
         new Sound(SYSTEM_THEME_NOTIFICATION_DIR.getAbsolutePath(), "/SoundsCache/notifications/",
@@ -144,25 +148,27 @@ public final class SubstratumService extends SystemService {
                 "ringtone", "ringtone", RingtoneManager.TYPE_RINGTONE)
     );
 
-    private static IOverlayManager mOm;
-    private static IPackageManager mPm;
-    private static boolean isWaiting = false;
-    private static String installedPackageName;
+    private IOverlayManager mOm;
+    private IPackageManager mPm;
+    private boolean mIsWaiting;
+    private String mInstalledPackageName;
 
     private Context mContext;
     private final Object mLock = new Object();
+    private boolean mSigOverride = false;
+    private SettingsObserver mObserver = new SettingsObserver();
 
-    private static ISubstratumHelperService helperService;
-    private final ServiceConnection helperConnection = new ServiceConnection() {
+    private ISubstratumHelperService mHelperService;
+    private final ServiceConnection mHelperConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            helperService = ISubstratumHelperService.Stub.asInterface(service);
+            mHelperService = ISubstratumHelperService.Stub.asInterface(service);
             log("Helper service connected");
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            helperService = null;
+            mHelperService = null;
             log("Helper service disconnected");
         }
     };
@@ -170,49 +176,51 @@ public final class SubstratumService extends SystemService {
     public SubstratumService(@NonNull final Context context) {
         super(context);
         mContext = context;
-        if (makeDir(SYSTEM_THEME_DIR)) restoreconThemeDir();
-        publishBinderService("substratum", mService);
+    }
+
+    @Override
+    public void onBootPhase(int phase) {
+        if (phase == PHASE_SYSTEM_SERVICES_READY) {
+            if (makeDir(SYSTEM_THEME_DIR)) {
+                restoreconThemeDir();
+            }
+
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Secure.getUriFor(Settings.Secure.FORCE_AUTHORIZE_SUBSTRATUM_PACKAGES),
+                    false, mObserver);
+            updateSettings();
+
+            mOm = IOverlayManager.Stub.asInterface(ServiceManager.getService("overlay"));
+            mPm = AppGlobals.getPackageManager();
+            publishBinderService("substratum", mService);
+
+            log("published substratum service");
+        }
     }
 
     @Override
     public void onStart() {
+        // Intentionally left empty
     }
 
     @Override
     public void onSwitchUser(final int newUserId) {
+        // Intentionally left empty
     }
 
     private void waitForHelperConnection() {
-        if (helperService == null) {
+        if (mHelperService == null) {
             Intent intent = new Intent("android.substratum.service.SubstratumHelperService");
             intent.setPackage("android.substratum.service");
-            mContext.bindServiceAsUser(intent, helperConnection,
+            mContext.bindServiceAsUser(intent, mHelperConnection,
                     Context.BIND_AUTO_CREATE, UserHandle.SYSTEM);
-
-            while (helperService == null) {
-                try {
-                    Thread.sleep(1);
-                } catch (InterruptedException e) {
-                    // Shouldn't happen
-                }
-            }
         }
-    }
-
-    private void endHelperConnection() {
-        mContext.unbindService(helperConnection);
-    }
-
-    private boolean forceAuthorizePackages() {
-        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.FORCE_AUTHORIZE_SUBSTRATUM_PACKAGES,
-                0, UserHandle.USER_CURRENT) == 1;
     }
 
     private boolean doSignaturesMatch(String packageName, Signature signature) {
         if (packageName != null) {
               try {
-                  PackageInfo pi = getPm().getPackageInfo(packageName,
+                  PackageInfo pi = mPm.getPackageInfo(packageName,
                         PackageManager.GET_SIGNATURES, UserHandle.USER_SYSTEM);
                   if (pi.signatures != null
                            && pi.signatures.length == 1
@@ -226,38 +234,36 @@ public final class SubstratumService extends SystemService {
        return false;
     }
 
-    private boolean isCallerAuthorized(int uid) {
+    private void checkCallerAuthorization(int uid) {
         String callingPackage;
         try {
-            callingPackage = getPm().getPackagesForUid(uid)[0];
+            callingPackage = mPm.getPackagesForUid(uid)[0];
         } catch (RemoteException ignored) {
-            return false;
+            throw new SecurityException("Cannot check caller authorization");
         }
 
         if (TextUtils.equals(callingPackage, SUBSTRATUM_PACKAGE)) {
             for (Signature sig : AUTHORIZED_SIGNATURES) {
                 if (doSignaturesMatch(callingPackage, sig)) {
-                return true;
+                    return;
                 }
             }
         }
 
-       if (forceAuthorizePackages()) {
+       if (mSigOverride) {
             log("\'" + callingPackage + "\' is not an authorized calling package, but the user " +
                     "has explicitly allowed all calling packages, " +
                     "validating calling package permissions...");
-            return true;
+            return;
         }
 
-        logE("\'" + callingPackage + "\' is not an authorized calling package.");
-        return false;
+        throw new SecurityException("Caller is not authorized");
     }
-
 
     private final IBinder mService = new ISubstratumService.Stub() {
         @Override
         public void installOverlay(List<String> paths) {
-            if (!isCallerAuthorized(Binder.getCallingUid())) return;
+            checkCallerAuthorization(Binder.getCallingUid());
             final long ident = Binder.clearCallingIdentity();
             final int packageVerifierEnable = Settings.Global.getInt(
                     mContext.getContentResolver(),
@@ -267,48 +273,62 @@ public final class SubstratumService extends SystemService {
                     PackageInstallObserver installObserver = new PackageInstallObserver();
                     PackageDeleteObserver deleteObserver = new PackageDeleteObserver();
                     for (String path : paths) {
-                        installedPackageName = null;
-                        File apkFile = new File(path);
-                        if (apkFile.exists()) {
-                            log("Installer - installing package from path \'" + path + "\'");
-                            isWaiting = true;
-                            Settings.Global.putInt(mContext.getContentResolver(),
-                                    Settings.Global.PACKAGE_VERIFIER_ENABLE, 0);
-                            getPm().installPackageAsUser(
+                        mInstalledPackageName = null;
+                        log("Installer - installing package from path \'" + path + "\'");
+                        mIsWaiting = true;
+                        Settings.Global.putInt(mContext.getContentResolver(),
+                                Settings.Global.PACKAGE_VERIFIER_ENABLE, 0);
+                        try {
+                            mPm.installPackageAsUser(
                                     path,
                                     installObserver,
                                     PackageManager.INSTALL_REPLACE_EXISTING,
                                     null,
                                     UserHandle.USER_SYSTEM);
-                            while (isWaiting) {
-                                Thread.sleep(1);
-                            }
 
-                            if (installedPackageName != null) {
-                                PackageInfo pi = getPm().getPackageInfo(installedPackageName,
+                            while (mIsWaiting) {
+                                try {
+                                    Thread.sleep(1);
+                                } catch (InterruptedException e) {
+                                    // Someone interrupted my sleep, ugh!
+                                }
+                            }
+                        } catch (RemoteException e) {
+                            logE("There is an exception when trying to install " + path, e);
+                            continue;
+                        }
+
+                        if (mInstalledPackageName != null) {
+                            try {
+                                PackageInfo pi = mPm.getPackageInfo(mInstalledPackageName,
                                         0, UserHandle.USER_SYSTEM);
                                 if ((pi.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0 ||
                                         pi.overlayTarget == null) {
-                                    isWaiting = true;
-                                    int versionCode = getPm()
-                                            .getPackageInfo(installedPackageName, 0, UserHandle.USER_SYSTEM)
+                                    mIsWaiting = true;
+                                    int versionCode = mPm.getPackageInfo(
+                                            mInstalledPackageName, 0, UserHandle.USER_SYSTEM)
                                             .versionCode;
-                                    getPm().deletePackageAsUser(
-                                            installedPackageName,
+                                    mPm.deletePackageAsUser(
+                                            mInstalledPackageName,
                                             versionCode,
                                             deleteObserver,
                                             0,
                                             UserHandle.USER_SYSTEM);
-                                    while (isWaiting) {
-                                        Thread.sleep(1);
+
+                                    while (mIsWaiting) {
+                                        try {
+                                            Thread.sleep(1);
+                                        } catch (InterruptedException e) {
+                                            // Someone interrupted my sleep, ugh!
+                                        }
                                     }
                                 }
+                            } catch (RemoteException e) {
+                                // Probably won't happen but we need to keep quiet here
                             }
                         }
                     }
                 }
-            } catch (Exception e) {
-                logE("There is an exception when trying to install package", e);
             } finally {
                 Settings.Global.putInt(mContext.getContentResolver(),
                         Settings.Global.PACKAGE_VERIFIER_ENABLE, packageVerifierEnable);
@@ -318,7 +338,7 @@ public final class SubstratumService extends SystemService {
 
         @Override
         public void uninstallOverlay(List<String> packages, boolean restartUi) {
-            if (!isCallerAuthorized(Binder.getCallingUid())) return;
+            checkCallerAuthorization(Binder.getCallingUid());
             final long ident = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
@@ -329,29 +349,35 @@ public final class SubstratumService extends SystemService {
                             switchOverlayState(p, false);
                         }
 
-                        PackageInfo pi = getPm()
-                                .getPackageInfo(p, 0, UserHandle.USER_SYSTEM);
-                        if ((pi.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) == 0 &&
-                                pi.overlayTarget != null) {
-                            log("Remover - uninstalling \'" + p + "\'...");
-                            isWaiting = true;
-                            getPm().deletePackageAsUser(
-                                    p,
-                                    pi.versionCode,
-                                    observer,
-                                    0,
-                                    UserHandle.USER_SYSTEM);
-                            while (isWaiting) {
-                                Thread.sleep(1);
+                        try {
+                            PackageInfo pi = mPm.getPackageInfo(p, 0, UserHandle.USER_SYSTEM);
+                            if ((pi.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) == 0 &&
+                                    pi.overlayTarget != null) {
+                                log("Remover - uninstalling \'" + p + "\'...");
+                                mIsWaiting = true;
+                                mPm.deletePackageAsUser(
+                                        p,
+                                        pi.versionCode,
+                                        observer,
+                                        0,
+                                        UserHandle.USER_SYSTEM);
+
+                                while (mIsWaiting) {
+                                    try {
+                                        Thread.sleep(1);
+                                    } catch (InterruptedException e) {
+                                        // Someone interrupted my sleep, ugh!
+                                    }
+                                }
                             }
+                        } catch (RemoteException e) {
+                            logE("There is an exception when trying to uninstall package", e);
                         }
                     }
                     if (restartUi) {
                         restartUi();
                     }
                 }
-            } catch (Exception e) {
-                logE("There is an exception when trying to uninstall package", e);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -359,7 +385,7 @@ public final class SubstratumService extends SystemService {
 
         @Override
         public void switchOverlay(List<String> packages, boolean enable, boolean restartUi) {
-            if (!isCallerAuthorized(Binder.getCallingUid())) return;
+            checkCallerAuthorization(Binder.getCallingUid());
             final long ident = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
@@ -378,7 +404,7 @@ public final class SubstratumService extends SystemService {
 
         @Override
         public void setPriority(List<String> packages, boolean restartUi) {
-            if (!isCallerAuthorized(Binder.getCallingUid())) return;
+            checkCallerAuthorization(Binder.getCallingUid());
             final long ident = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
@@ -387,7 +413,7 @@ public final class SubstratumService extends SystemService {
                         String parentName = packages.get(i);
                         String packageName = packages.get(i + 1);
 
-                        getOm().setPriority(packageName, parentName,
+                        mOm.setPriority(packageName, parentName,
                                 UserHandle.USER_SYSTEM);
                     }
                     if (restartUi) {
@@ -403,7 +429,7 @@ public final class SubstratumService extends SystemService {
 
         @Override
         public void restartSystemUI() {
-            if (!isCallerAuthorized(Binder.getCallingUid())) return;
+            checkCallerAuthorization(Binder.getCallingUid());
             final long ident = Binder.clearCallingIdentity();
             try {
                 log("Restarting SystemUI...");
@@ -415,7 +441,7 @@ public final class SubstratumService extends SystemService {
 
         @Override
         public void copy(String source, String destination) {
-            if (!isCallerAuthorized(Binder.getCallingUid())) return;
+            checkCallerAuthorization(Binder.getCallingUid());
             final long ident = Binder.clearCallingIdentity();
             try {
                 log("CopyJob - copying \'" + source + "\' to \'" + destination + "\'...");
@@ -436,7 +462,7 @@ public final class SubstratumService extends SystemService {
 
         @Override
         public void move(String source, String destination) {
-            if (!isCallerAuthorized(Binder.getCallingUid())) return;
+            checkCallerAuthorization(Binder.getCallingUid());
             final long ident = Binder.clearCallingIdentity();
             try {
                 log("MoveJob - moving \'" + source + "\' to \'" + destination + "\'...");
@@ -458,7 +484,7 @@ public final class SubstratumService extends SystemService {
 
         @Override
         public void mkdir(String destination) {
-            if (!isCallerAuthorized(Binder.getCallingUid())) return;
+            checkCallerAuthorization(Binder.getCallingUid());
             final long ident = Binder.clearCallingIdentity();
             try {
                 log("MkdirJob - creating \'" + destination + "\'...");
@@ -470,7 +496,7 @@ public final class SubstratumService extends SystemService {
 
         @Override
         public void deleteDirectory(String directory, boolean withParent) {
-            if (!isCallerAuthorized(Binder.getCallingUid())) return;
+            checkCallerAuthorization(Binder.getCallingUid());
             final long ident = Binder.clearCallingIdentity();
             try {
                 if (withParent) {
@@ -485,7 +511,7 @@ public final class SubstratumService extends SystemService {
 
         @Override
         public void applyBootanimation(String name) {
-            if (!isCallerAuthorized(Binder.getCallingUid())) return;
+            checkCallerAuthorization(Binder.getCallingUid());
             final long ident = Binder.clearCallingIdentity();
             try {
                 if (name == null) {
@@ -502,7 +528,7 @@ public final class SubstratumService extends SystemService {
 
         @Override
         public void applyFonts(String pid, String fileName) {
-            if (!isCallerAuthorized(Binder.getCallingUid())) return;
+            checkCallerAuthorization(Binder.getCallingUid());
             final long ident = Binder.clearCallingIdentity();
             try {
                 if (pid == null) {
@@ -519,7 +545,7 @@ public final class SubstratumService extends SystemService {
 
         @Override
         public void applySounds(String pid, String fileName) {
-            if (!isCallerAuthorized(Binder.getCallingUid())) return;
+            checkCallerAuthorization(Binder.getCallingUid());
             final long ident = Binder.clearCallingIdentity();
             try {
                 if (pid == null) {
@@ -529,7 +555,6 @@ public final class SubstratumService extends SystemService {
                     log("Configuring theme sounds...");
                     applyThemedSounds(pid, fileName);
                 }
-                restartUi();
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -538,7 +563,7 @@ public final class SubstratumService extends SystemService {
         @Override
         public void applyProfile(List<String> enable, List<String> disable, String name,
                 boolean restartUi) {
-            if (!isCallerAuthorized(Binder.getCallingUid())) return;
+            checkCallerAuthorization(Binder.getCallingUid());
             final long ident = Binder.clearCallingIdentity();
             try {
                 log("ProfileJob - Applying profile: " + name);
@@ -548,7 +573,7 @@ public final class SubstratumService extends SystemService {
                 boolean oldFontsExists = SYSTEM_THEME_FONT_DIR.exists();
                 boolean oldSoundsExists = SYSTEM_THEME_AUDIO_DIR.exists();
 
-                helperService.applyProfile(name);
+                mHelperService.applyProfile(name);
 
                 boolean newFontsExists = SYSTEM_THEME_FONT_DIR.exists();
                 boolean newSoundsExists = SYSTEM_THEME_AUDIO_DIR.exists();
@@ -584,7 +609,7 @@ public final class SubstratumService extends SystemService {
 
         @Override
         public void applyShutdownAnimation(String name) {
-            if (!isCallerAuthorized(Binder.getCallingUid())) return;
+            checkCallerAuthorization(Binder.getCallingUid());
             final long ident = Binder.clearCallingIdentity();
             try {
                 if (name == null) {
@@ -598,23 +623,18 @@ public final class SubstratumService extends SystemService {
                 Binder.restoreCallingIdentity(ident);
             }
         }
+
+        @Override
+        public Map getAllOverlays(int uid) {
+            checkCallerAuthorization(Binder.getCallingUid());
+            try {
+                return mOm.getAllOverlays(uid);
+            } catch (RemoteException e) {
+                logE("There is an exception when trying to get all overlays", e);
+                return null;
+            }
+        }
     };
-
-    private static IOverlayManager getOm() {
-        if (mOm == null) {
-            mOm = IOverlayManager.Stub.asInterface(
-                    ServiceManager.getService(Context.OVERLAY_SERVICE));
-        }
-        return mOm;
-    }
-
-    private static IPackageManager getPm() {
-        if (mPm == null) {
-            mPm = IPackageManager.Stub.asInterface(
-                    ServiceManager.getService("package"));
-        }
-        return mPm;
-    }
 
     private Context getAppContext(String packageName) {
         Context ctx = null;
@@ -627,13 +647,9 @@ public final class SubstratumService extends SystemService {
         return ctx;
     }
 
-    private Context getSubsContext() {
-        return getAppContext(SUBSTRATUM_PACKAGE);
-    }
-
     private void switchOverlayState(String packageName, boolean enable) {
         try {
-            getOm().setEnabled(packageName, enable, UserHandle.USER_SYSTEM);
+            mOm.setEnabled(packageName, enable, UserHandle.USER_SYSTEM);
         } catch (RemoteException e) {
             logE("There is an exception when trying to switch overlay state", e);
         }
@@ -642,7 +658,7 @@ public final class SubstratumService extends SystemService {
     private boolean isOverlayEnabled(String packageName) {
         boolean enabled = false;
         try {
-            OverlayInfo info = getOm().getOverlayInfo(packageName, UserHandle.USER_SYSTEM);
+            OverlayInfo info = mOm.getOverlayInfo(packageName, UserHandle.USER_SYSTEM);
             if (info != null) {
                 enabled = info.isEnabled();
             } else {
@@ -663,44 +679,36 @@ public final class SubstratumService extends SystemService {
     private void copyBootAnimation(String fileName) {
         try {
             waitForHelperConnection();
-            helperService.applyBootAnimation();
-        } catch (Exception e) {
+            mHelperService.applyBootAnimation();
+        } catch (RemoteException e) {
             logE("There is an exception when trying to apply boot animation", e);
         }
     }
 
     private void clearBootAnimation() {
-        try {
-            if (SYSTEM_THEME_BOOTANIMATION_DIR.exists()) {
-                boolean deleted = SYSTEM_THEME_BOOTANIMATION_DIR.delete();
-                if (!deleted) {
-                    logE("Could not delete themed boot animation");
-                }
+        if (SYSTEM_THEME_BOOTANIMATION_DIR.exists()) {
+            boolean deleted = SYSTEM_THEME_BOOTANIMATION_DIR.delete();
+            if (!deleted) {
+                logE("Could not delete themed boot animation");
             }
-        } catch (Exception e) {
-            logE("There is an exception when trying to delete themed boot animation", e);
         }
     }
 
     private void copyShutdownAnimation(String fileName) {
         try {
             waitForHelperConnection();
-            helperService.applyShutdownAnimation();
-        } catch (Exception e) {
+            mHelperService.applyShutdownAnimation();
+        } catch (RemoteException e) {
             logE("There is an exception when trying to apply shutdown animation", e);
         }
     }
 
     private void clearShutdownAnimation() {
-        try {
-            if (SYSTEM_THEME_SHUTDOWNANIMATION_DIR.exists()) {
-                boolean deleted = SYSTEM_THEME_SHUTDOWNANIMATION_DIR.delete();
-                if (!deleted) {
-                    logE("Could not delete themed shutdown animation");
-                }
+        if (SYSTEM_THEME_SHUTDOWNANIMATION_DIR.exists()) {
+            boolean deleted = SYSTEM_THEME_SHUTDOWNANIMATION_DIR.delete();
+            if (!deleted) {
+                logE("Could not delete themed shutdown animation");
             }
-        } catch (Exception e) {
-            logE("There is an exception when trying to delete themed shutdown animation", e);
         }
     }
 
@@ -734,7 +742,7 @@ public final class SubstratumService extends SystemService {
         File fontZip = new File(cacheDir, zipFileName);
         try (InputStream inputStream = am.open("fonts/" + zipFileName)) {
             FileUtils.copyToFile(inputStream, fontZip);
-        } catch (Exception e) {
+        } catch (IOException e) {
             logE("There is an exception when trying to copy themed fonts", e);
         }
 
@@ -746,16 +754,11 @@ public final class SubstratumService extends SystemService {
             logE("Could not delete ZIP file");
         }
 
-        // Check if theme zip included a fonts.xml. If not, Substratum
-        // is kind enough to provide one for us in it's assets
-        File testConfig = new File(cacheDir, "fonts.xml");
-        if (!testConfig.exists()) {
-            AssetManager subsAm = getSubsContext().getAssets();
-            try (InputStream inputStream = subsAm.open("fonts.xml")) {
-                FileUtils.copyToFile(inputStream, testConfig);
-            } catch (Exception e) {
-                logE("There is an exception when trying to extract default fonts config", e);
-            }
+        // Check if theme zip included a fonts.xml. If not, get from existing file in /system
+        File srcConfig = new File("/system/etc/fonts.xml");
+        File dstConfig = new File(cacheDir, "fonts.xml");
+        if (!dstConfig.exists()) {
+            FileUtils.copyFile(srcConfig, dstConfig);
         }
 
         // Prepare system theme fonts folder and copy new fonts folder from our cache
@@ -784,12 +787,12 @@ public final class SubstratumService extends SystemService {
         }
 
         // Let system know it's time for a font change
-        SystemProperties.set("sys.refresh_theme", "1");
-        Typeface.recreateDefaults();
+        SystemProperties.set("sys.refresh_font", "true");
         float fontSize = Settings.System.getFloatForUser(mContext.getContentResolver(),
                 Settings.System.FONT_SCALE, 1.0f, UserHandle.USER_CURRENT);
         Settings.System.putFloatForUser(mContext.getContentResolver(),
                 Settings.System.FONT_SCALE, (fontSize + 0.0000001f), UserHandle.USER_CURRENT);
+        restartUi();
     }
 
     private void applyThemedSounds(String pid, String zipFileName) {
@@ -819,7 +822,7 @@ public final class SubstratumService extends SystemService {
         File soundsZip = new File(cacheDir, zipFileName);
         try (InputStream inputStream = am.open("audio/" + zipFileName)) {
             FileUtils.copyToFile(inputStream, soundsZip);
-        } catch (Exception e) {
+        } catch (IOException e) {
             logE("There is an exception when trying to copy themed sounds", e);
         }
 
@@ -861,69 +864,90 @@ public final class SubstratumService extends SystemService {
 
     private void clearSounds() {
         FileUtils.deleteContentsAndDir(SYSTEM_THEME_AUDIO_DIR);
-        SoundUtils.setDefaultAudible(mContext, RingtoneManager.TYPE_ALARM);
-        SoundUtils.setDefaultAudible(mContext, RingtoneManager.TYPE_NOTIFICATION);
-        SoundUtils.setDefaultAudible(mContext, RingtoneManager.TYPE_RINGTONE);
-        SoundUtils.setDefaultUISounds(mContext.getContentResolver(), "lock_sound", "Lock.ogg");
-        SoundUtils.setDefaultUISounds(mContext.getContentResolver(), "unlock_sound", "Unlock.ogg");
-        SoundUtils.setDefaultUISounds(mContext.getContentResolver(), "low_battery_sound", "LowBattery.ogg");
+        refreshSounds();
     }
 
     private void refreshSounds() {
-
         if (!SYSTEM_THEME_AUDIO_DIR.exists()) {
-            return;
+            // reset to default sounds
+            SoundUtils.setDefaultAudible(mContext, RingtoneManager.TYPE_ALARM);
+            SoundUtils.setDefaultAudible(mContext, RingtoneManager.TYPE_NOTIFICATION);
+            SoundUtils.setDefaultAudible(mContext, RingtoneManager.TYPE_RINGTONE);
+            SoundUtils.setDefaultUISounds(mContext.getContentResolver(), "lock_sound", "Lock.ogg");
+            SoundUtils.setDefaultUISounds(mContext.getContentResolver(), "unlock_sound", "Unlock.ogg");
+        } else {
+            // Set permissions
+            setPermissionsRecursive(SYSTEM_THEME_AUDIO_DIR,
+                    FileUtils.S_IRWXU | FileUtils.S_IRGRP | FileUtils.S_IRWXO,
+                    FileUtils.S_IRWXU | FileUtils.S_IRWXG | FileUtils.S_IROTH | FileUtils.S_IXOTH);
+
+            for (Sound sound : SOUNDS) {
+                File themePath = new File(sound.themePath);
+
+                if (!(themePath.exists() && themePath.isDirectory())) {
+                    continue;
+                }
+
+                String metadataName;
+                switch (sound.type) {
+                    case RingtoneManager.TYPE_RINGTONE:
+                        metadataName = "Theme Ringtone";
+                        break;
+                    case RingtoneManager.TYPE_NOTIFICATION:
+                        metadataName = "Theme Notification";
+                        break;
+                    case RingtoneManager.TYPE_ALARM:
+                        metadataName = "Theme Alarm";
+                        break;
+                    default:
+                        metadataName = "Theme";
+                }
+
+                File mp3 = new File(themePath, sound.soundPath + ".mp3");
+                File ogg = new File(themePath, sound.soundPath + ".ogg");
+
+                if (ogg.exists()) {
+                    if (sound.themePath.equals(SYSTEM_THEME_UI_SOUNDS_DIR.getAbsolutePath())
+                            && sound.type != 0) { // Effect_Tick
+                        SoundUtils.setUIAudible(mContext, ogg, sound.type, sound.soundName);
+                    } else if (sound.themePath.equals(SYSTEM_THEME_UI_SOUNDS_DIR.getAbsolutePath())) {
+                        SoundUtils.setUISounds(mContext.getContentResolver(), sound.soundName, ogg
+                                .getAbsolutePath());
+                    } else {
+                        SoundUtils.setAudible(mContext, ogg, sound.type, metadataName);
+                    }
+                } else if (mp3.exists()) {
+                    if (sound.themePath.equals(SYSTEM_THEME_UI_SOUNDS_DIR.getAbsolutePath())
+                            && sound.type != 0) { // Effect_Tick
+                        SoundUtils.setUIAudible(mContext, mp3, sound.type, sound.soundName);
+                    } else if (sound.themePath.equals(SYSTEM_THEME_UI_SOUNDS_DIR.getAbsolutePath())) {
+                        SoundUtils.setUISounds(mContext.getContentResolver(), sound.soundName,
+                                mp3.getAbsolutePath());
+                    } else {
+                        SoundUtils.setAudible(mContext, mp3, sound.type, metadataName);
+                    }
+                } else {
+                    if (sound.themePath.equals(SYSTEM_THEME_UI_SOUNDS_DIR.getAbsolutePath())) {
+                        SoundUtils.setDefaultUISounds(mContext.getContentResolver(),
+                                sound.soundName, sound.soundPath + ".ogg");
+                    } else {
+                        SoundUtils.setDefaultAudible(mContext, sound.type);
+                    }
+                }
+            }
         }
 
-        // Set permissions
-        setPermissionsRecursive(SYSTEM_THEME_AUDIO_DIR,
-                FileUtils.S_IRWXU | FileUtils.S_IRGRP | FileUtils.S_IRWXO,
-                FileUtils.S_IRWXU | FileUtils.S_IRWXG | FileUtils.S_IROTH | FileUtils.S_IXOTH);
+        // Refresh sounds
+        Intent i = new Intent("com.android.systemui.action.REFRESH_SOUND");
+        i.setPackage("com.android.systemui");
+        mContext.sendBroadcastAsUser(i, UserHandle.SYSTEM);
 
-        int metaDataId = getSubsContext().getResources().getIdentifier(
-                "content_resolver_notification_metadata",
-                "string", SUBSTRATUM_PACKAGE);
-
-        for (Sound sound : SOUNDS) {
-            File themePath = new File(sound.themePath);
-
-            if (!(themePath.exists() && themePath.isDirectory())) {
-                continue;
-            }
-
-            File mp3 = new File(themePath, sound.soundPath + ".mp3");
-            File ogg = new File(themePath, sound.soundPath + ".ogg");
-
-            if (ogg.exists()) {
-                if (sound.themePath.equals(SYSTEM_THEME_UI_SOUNDS_DIR.getAbsolutePath())
-                        && sound.type != 0) {
-                    SoundUtils.setUIAudible(mContext, ogg, ogg, sound.type, sound.soundName);
-                } else if (sound.themePath.equals(SYSTEM_THEME_UI_SOUNDS_DIR.getAbsolutePath())) {
-                    SoundUtils.setUISounds(mContext.getContentResolver(), sound.soundName, ogg
-                            .getAbsolutePath());
-                } else {
-                    SoundUtils.setAudible(mContext, ogg, ogg, sound.type, getSubsContext().getString
-                            (metaDataId));
-                }
-            } else if (mp3.exists()) {
-                if (sound.themePath.equals(SYSTEM_THEME_UI_SOUNDS_DIR.getAbsolutePath())
-                        && sound.type != 0) {
-                    SoundUtils.setUIAudible(mContext, mp3, mp3, sound.type, sound.soundName);
-                } else if (sound.themePath.equals(SYSTEM_THEME_UI_SOUNDS_DIR.getAbsolutePath())) {
-                    SoundUtils.setUISounds(mContext.getContentResolver(), sound.soundName,
-                            mp3.getAbsolutePath());
-                } else {
-                    SoundUtils.setAudible(mContext, mp3, mp3, sound.type, getSubsContext().getString
-                            (metaDataId));
-                }
-            } else {
-                if (sound.themePath.equals(SYSTEM_THEME_UI_SOUNDS_DIR.getAbsolutePath())) {
-                    SoundUtils.setDefaultUISounds(mContext.getContentResolver(),
-                            sound.soundName, sound.soundPath + ".ogg");
-                } else {
-                    SoundUtils.setDefaultAudible(mContext, sound.type);
-                }
-            }
+        final boolean soundEffectEnabled = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.SOUND_EFFECTS_ENABLED, 1) == 1;
+        if (soundEffectEnabled) {
+            AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+            am.unloadSoundEffects();
+            am.loadSoundEffects();
         }
     }
 
@@ -953,7 +977,7 @@ public final class SubstratumService extends SystemService {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             logE("There is an exception when trying to unzip", e);
         }
     }
@@ -1024,7 +1048,7 @@ public final class SubstratumService extends SystemService {
 
     private void log(String msg) {
         if (DEBUG) {
-            Log.d(TAG, msg);
+            Log.e(TAG, msg);
         }
     }
 
@@ -1038,6 +1062,14 @@ public final class SubstratumService extends SystemService {
 
     private void logE(String msg) {
         logE(msg, null);
+    }
+
+    private void updateSettings() {
+        synchronized (mLock) {
+            mSigOverride = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.FORCE_AUTHORIZE_SUBSTRATUM_PACKAGES, 0,
+                    UserHandle.USER_CURRENT) == 1;
+        }
     }
 
     private static class Sound {
@@ -1063,19 +1095,30 @@ public final class SubstratumService extends SystemService {
         }
     }
 
+    private class SettingsObserver extends ContentObserver {
+        public SettingsObserver() {
+            super(new Handler());
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            updateSettings();
+        }
+    };
+
     private class PackageInstallObserver extends IPackageInstallObserver2.Stub {
         @Override
         public void onUserActionRequired(Intent intent) throws RemoteException {
             log("Installer - user action required callback");
-            isWaiting = false;
+            mIsWaiting = false;
         }
 
         @Override
         public void onPackageInstalled(String packageName, int returnCode,
                                        String msg, Bundle extras) {
             log("Installer - successfully installed \'" + packageName + "\'!");
-            installedPackageName = packageName;
-            isWaiting = false;
+            mInstalledPackageName = packageName;
+            mIsWaiting = false;
         }
     }
 
@@ -1083,8 +1126,7 @@ public final class SubstratumService extends SystemService {
         @Override
         public void packageDeleted(String packageName, int returnCode) {
             log("Remover - successfully removed \'" + packageName + "\'");
-            isWaiting = false;
+            mIsWaiting = false;
         }
     }
 }
-
