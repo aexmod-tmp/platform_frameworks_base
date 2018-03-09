@@ -4789,6 +4789,13 @@ public final class Settings {
         public static final String STATUSBAR_BATTERY_BAR_THICKNESS = "statusbar_battery_bar_thickness";
 
         /**
+         * Whether to display cross sign for a data disabled connection
+         * @hide
+         */
+        public static final String DATA_DISABLED_ICON = "data_disabled_icon";
+
+        /**
+         * Allow all rotations.
          * @hide
          */
         public static final String STATUSBAR_BATTERY_BAR_STYLE = "statusbar_battery_bar_style";
