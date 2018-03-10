@@ -148,7 +148,7 @@ public class BatteryMeterView extends LinearLayout implements
     }
 
     public void setForceShowPercent(boolean show) {
-        mForceShowPercent = show;
+        mForceShowPercent = show || mStyle == BatteryMeterDrawableBase.BATTERY_STYLE_TEXT;
         updateShowPercent();
     }
 
