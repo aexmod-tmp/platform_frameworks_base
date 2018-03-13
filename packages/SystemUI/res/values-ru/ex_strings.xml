@@ -84,4 +84,10 @@
     <!-- Recents -->
     <string name="recents_app_killed">Приложение закрыто</string>
 
+    <!-- Kill button in notification guts -->
+    <string name="force_stop_dlg_title">Остановить принудительно?</string>
+    <string name="force_stop_dlg_text">Принудительное закрытие приложения может отразиться на его функциональности.</string>
+    <string name="dlg_ok">ОК</string>
+    <string name="dlg_cancel">Отмена</string>
+    <string name="kill">Закрыть приложение</string>
 </resources>
