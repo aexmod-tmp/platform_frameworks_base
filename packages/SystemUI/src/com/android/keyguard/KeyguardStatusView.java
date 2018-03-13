@@ -214,7 +214,7 @@ public class KeyguardStatusView extends GridLayout implements
         mWeatherCurrentTemp = (TextView) findViewById(R.id.current_temp);
         mWeatherConditionText = (TextView) findViewById(R.id.condition);
 
-        mVisibleInDoze = new View[]{mBatteryDoze, mClockView, mKeyguardStatusArea, mWeatherView};
+        mVisibleInDoze = new View[]{/*mBatteryDoze, */mClockView, mKeyguardStatusArea, mWeatherView};
 
         boolean shouldMarquee = KeyguardUpdateMonitor.getInstance(mContext).isDeviceInteractive();
         setEnableMarquee(shouldMarquee);
