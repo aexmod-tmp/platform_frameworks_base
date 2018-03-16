@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!-- OmniJaws -->
+    <string name="omnijaws_service_error">Ошибка</string>
+    <string name="omnijaws_service_unkown">Нет данных погоды</string>
+    <string name="omnijaws_service_error_long">Ошибка загрузки данных погоды</string>
+    <string name="omnijaws_service_disabled">Сервис отключён</string>
+    <string name="omnijaws_detail_header">Погода</string>
+    <string name="omnijaws_label_default">Погода</string>
+    <string name="omnijaws_current_text">Сейчас</string>
+    <string name="omnijaws_package_not_available">OmniJaws недоступен</string>
+    <string name="omnijaws_service_last_update">Обновлено:</string>
+
+    <!-- ADB over network QS tile -->
+    <string name="quick_settings_network_adb_enabled_label">Включено</string>
+    <string name="quick_settings_network_adb_disabled_label">Выключено</string>
+    <string name="quick_settings_network_adb_label">ADB по сети</string>
+    <string name="quick_settings_network_adb_toast">Отладка USB не включена</string>
+</resources>
