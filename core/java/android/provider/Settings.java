@@ -4083,6 +4083,12 @@ public final class Settings {
         public static final String  RECENTS_CLEAR_ALL_LOCATION = "recents_clear_all_location";
 
         /**
+         * location of the forced closе of app button
+         * @hide
+         */
+        public static final String  RECENTS_KILL_APP_LOCATION = "recents_kill_app_location";
+
+        /**
          * Whether to show Brightness Icon On Brightness Slider
          * @hide
          */

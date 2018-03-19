@@ -194,6 +194,7 @@ public class TaskViewHeader extends FrameLayout
     int mTaskBarViewDarkTextColor;
     int mDisabledTaskBarBackgroundColor;
     int mMoveTaskTargetStackId = INVALID_STACK_ID;
+    int mLocationKillButton = 1;
 
     // Header background
     private HighlightColorDrawable mBackground;
@@ -277,9 +278,10 @@ public class TaskViewHeader extends FrameLayout
         mIconView.setOnLongClickListener(this);
         mTitleView = (TextView) findViewById(R.id.title);
         mDismissButton = (ImageView) findViewById(R.id.dismiss_task);
-        mLockTaskButton = (ImageView) findViewById(R.id.lock_task);
         mKillButton = findViewById(R.id.kill_app);
+        mLockTaskButton = (ImageView) findViewById(R.id.lock_task);
         mPinButton = findViewById(R.id.lock_to_app_fab);
+
         if (ssp.hasFreeformWorkspaceSupport()) {
             mMoveTaskButton = findViewById(R.id.move_task);
         }
@@ -414,7 +416,7 @@ public class TaskViewHeader extends FrameLayout
         mDismissButton.setVisibility(showDismissIcon ? View.VISIBLE : View.INVISIBLE);
         mDismissButton.setTranslationX(rightInset);
         mLockTaskButton.setVisibility(showDismissIcon ? View.VISIBLE : View.INVISIBLE);
-        mKillButton.setVisibility(showDismissIcon ? View.VISIBLE : View.INVISIBLE);
+        mKillButton.setVisibility((mLocationKillButton==1 && showDismissIcon) ? View.VISIBLE : View.INVISIBLE);
 
         setLeftTopRightBottom(0, 0, width, getMeasuredHeight());
     }
@@ -537,22 +539,37 @@ public class TaskViewHeader extends FrameLayout
         mTitleView.setContentDescription(t.titleDescription);
         mTitleView.setTextColor(t.useLightOnPrimaryColor ?
                 mTaskBarViewLightTextColor : mTaskBarViewDarkTextColor);
+
         mDismissButton.setImageDrawable(t.useLightOnPrimaryColor ?
                 mLightDismissDrawable : mDarkDismissDrawable);
         mDismissButton.setContentDescription(t.dismissDescription);
         mDismissButton.setOnClickListener(this);
         mDismissButton.setClickable(false);
         ((RippleDrawable) mDismissButton.getBackground()).setForceSoftware(true);
+
         updateLockTaskDrawable();
         mLockTaskButton.setOnClickListener(this);
         mLockTaskButton.setClickable(false);
         ((RippleDrawable) mLockTaskButton.getBackground()).setForceSoftware(true);
 
-        mKillButton.setImageDrawable(t.useLightOnPrimaryColor ?
-                mLightKillDrawable : mDarkKillDrawable);
-        mKillButton.setOnClickListener(this);
-        mKillButton.setClickable(false);
-        ((RippleDrawable) mKillButton.getBackground()).setForceSoftware(true);
+        mLocationKillButton = Settings.System.getIntForUser(mContext.getContentResolver(), Settings.System.RECENTS_KILL_APP_LOCATION, mLocationKillButton, UserHandle.USER_CURRENT);
+
+        if(mLocationKillButton==0){
+            mKillButton.setVisibility(View.GONE);
+        } else if(mLocationKillButton == 1){
+            mKillButton.setImageDrawable(t.useLightOnPrimaryColor ?
+                    mLightKillDrawable : mDarkKillDrawable);
+            mKillButton.setOnClickListener(this);
+            mKillButton.setClickable(false);
+            ((RippleDrawable) mKillButton.getBackground()).setForceSoftware(true);
+        } else {
+            mDismissButton.setImageDrawable(t.useLightOnPrimaryColor ?
+                    mLightKillDrawable : mDarkKillDrawable);
+            mDismissButton.setContentDescription("");
+            mDismissButton.setOnClickListener(this);
+            mDismissButton.setClickable(false);
+            ((RippleDrawable) mDismissButton.getBackground()).setForceSoftware(true);
+        }
 
         mPinButton.setImageDrawable(t.useLightOnPrimaryColor ?
                 mLightPinDrawable : mDarkPinDrawable);
@@ -654,16 +671,18 @@ public class TaskViewHeader extends FrameLayout
         } else {
             mLockTaskButton.setAlpha(1f);
         }
-        mKillButton.setVisibility(View.VISIBLE);
-        mKillButton.setClickable(true);
-        if (mKillButton.getVisibility() == VISIBLE) {
-            mKillButton.animate()
-                    .alpha(1f)
-                    .setInterpolator(Interpolators.FAST_OUT_LINEAR_IN)
-                    .setDuration(duration)
-                    .start();
-        } else {
-            mKillButton.setAlpha(1f);
+        if(mLocationKillButton == 1) {
+            mKillButton.setVisibility(View.VISIBLE);
+            mKillButton.setClickable(true);
+            if (mKillButton.getVisibility() == VISIBLE) {
+                mKillButton.animate()
+                        .alpha(1f)
+                        .setInterpolator(Interpolators.FAST_OUT_LINEAR_IN)
+                        .setDuration(duration)
+                        .start();
+            } else {
+                mKillButton.setAlpha(1f);
+            }
         }
         if (Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.LOCK_TO_APP_ENABLED, 0) != 0) {
@@ -711,10 +730,6 @@ public class TaskViewHeader extends FrameLayout
         mLockTaskButton.animate().cancel();
         mLockTaskButton.setAlpha(1f);
         mLockTaskButton.setClickable(true);
-        mKillButton.setVisibility(View.VISIBLE);
-        mKillButton.animate().cancel();
-        mKillButton.setAlpha(1f);
-        mKillButton.setClickable(true);
         //Pin button
         if (Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.LOCK_TO_APP_ENABLED, 0) != 0) {
@@ -732,6 +747,12 @@ public class TaskViewHeader extends FrameLayout
             mMoveTaskButton.setAlpha(1f);
             mMoveTaskButton.setClickable(true);
         }
+        if(mLocationKillButton == 1){
+            mKillButton.setVisibility(View.VISIBLE);
+            mKillButton.animate().cancel();
+            mKillButton.setAlpha(1f);
+            mKillButton.setClickable(true);
+        }
     }
 
     /**
@@ -746,9 +767,6 @@ public class TaskViewHeader extends FrameLayout
         mLockTaskButton.setVisibility(View.INVISIBLE);
         mLockTaskButton.setAlpha(0f);
         mLockTaskButton.setClickable(false);
-        mKillButton.setVisibility(View.INVISIBLE);
-        mKillButton.setAlpha(0f);
-        mKillButton.setClickable(false);
         //Pin button
         mPinButton.setVisibility(View.INVISIBLE);
         mPinButton.setAlpha(0f);
@@ -757,6 +775,11 @@ public class TaskViewHeader extends FrameLayout
             mMoveTaskButton.setVisibility(View.INVISIBLE);
             mMoveTaskButton.setAlpha(0f);
             mMoveTaskButton.setClickable(false);
+        }
+        if(mLocationKillButton == 1){
+            mKillButton.setVisibility(View.INVISIBLE);
+            mKillButton.setAlpha(0f);
+            mKillButton.setClickable(false);
         }
     }
 
@@ -771,12 +794,22 @@ public class TaskViewHeader extends FrameLayout
     @Override
     public void onClick(View v) {
         if (v == mDismissButton) {
-            TaskView tv = Utilities.findParent(this, TaskView.class);
-            if (!Recents.sLockedTasks.contains(tv.getTask())) {
-                tv.dismissTask();
-                // Keep track of deletions by the dismiss button
-                MetricsLogger.histogram(getContext(), "overview_task_dismissed_source",
-                        Constants.Metrics.DismissSourceHeaderButton);
+            if(mLocationKillButton==2){
+                TaskView tv = Utilities.findParent(this, TaskView.class);
+                if (killTask()) {
+                    tv.dismissTask();
+                    // Keep track of deletions by the dismiss button
+                    MetricsLogger.histogram(getContext(), "overview_task_dismissed_source",
+                            Constants.Metrics.DismissSourceHeaderButton);
+                }
+            } else {
+                TaskView tv = Utilities.findParent(this, TaskView.class);
+                if (!Recents.sLockedTasks.contains(tv.getTask())) {
+                    tv.dismissTask();
+                    // Keep track of deletions by the dismiss button
+                    MetricsLogger.histogram(getContext(), "overview_task_dismissed_source",
+                            Constants.Metrics.DismissSourceHeaderButton);
+                }
             }
         } else if (v == mKillButton) {
             TaskView tv = Utilities.findParent(this, TaskView.class);
