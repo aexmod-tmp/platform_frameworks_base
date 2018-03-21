@@ -29,28 +29,34 @@
     <string name="quick_settings_screenshot_label">Снимок экрана</string>
     <string name="quick_settings_region_screenshot_label">Снимок области</string>
 
+    <!-- Statusbar elements -->
     <string name="statusbar_items_title">Элементы статусбара</string>
 
     <!-- 4G LTE switch -->
     <string name="show_fourg_title">4G вместо LTE</string>
     <string name="show_fourg_summary">Заменить значок LTE на 4G в статусбаре</string>
 
-
+    <!-- Reboot panel -->
     <string name="global_action_restart_advanced">Расшир. перезагрузка</string>
     <string name="global_action_screenrecord">Запись экрана</string>
 
     <!-- Screenrecord Notification Ticker -->
     <string name="screenrecord_notif_ticker">Идёт запись экрана</string>
+    <string name="screenrecord_notif_final_ticker">Запись экрана сохранена</string>
     <!-- Screenrecord notification title -->
     <string name="screenrecord_notif_title">Запись экрана</string>
     <!-- Screenrecord notification action: Stop -->
     <string name="screenrecord_notif_stop">Стоп</string>
+    <string name="screenrecord_notif_completed">Запись экрана сохранена</string>
+    <string name="screenrecord_notif_duration">Время:</string>
     <!-- Screenrecord notification action: show/hide pointer -->
-    <string name="screenrecord_notif_pointer_on">Показать нажатия</string>
-    <string name="screenrecord_notif_pointer_off">Скрыть нажатия</string>
+    <string name="screenrecord_notif_pointer_on">Нажатия</string>
+    <string name="screenrecord_notif_pointer_off">Нажатия</string>
     <!-- Screen record notification error title -->
     <string name="screenrecord_notif_error">Невозможно записать экран</string>
     <string name="notification_channel_screenrecord">Запись экрана</string>
+    <string name="screenrecord_hide_hint">Индикатор записи</string>
+    <string name="screenrecord_show_hint">Индикатор записи</string>
 
     <string name="alert_on_charged_level">Можно отключить зарядку ( ">"<xliff:g id="percentage">%s</xliff:g> )</string>
     <string name="battery_level_good_title">Оптимальный уровень батареи</string>
@@ -131,4 +137,18 @@
     <string name="quick_settings_network_adb_disabled_label">Выключено</string>
     <string name="quick_settings_network_adb_label">ADB по сети</string>
     <string name="quick_settings_network_adb_toast">Отладка USB не включена</string>
+
+    <!-- Sync QS Tile -->
+    <string name="quick_settings_sync_label">Синхронизация</string>
+    <string name="accessibility_quick_settings_sync_off">Синхронизация выключена</string>
+    <string name="accessibility_quick_settings_sync_on">Синхронизация включена</string>
+    <string name="accessibility_quick_settings_sync_changed_off">Синхронизация выключена</string>
+    <string name="accessibility_quick_settings_sync_changed_on">Синхронизация включена</string>
+
+
+    <!-- Screenshot QS tile -->
+    <string name="quick_settings_screenrecord_label">Запись экрана</string>
+    <string name="quick_settings_screenrecord_lq_label">Запись экрана LQ</string>
+    <string name="quick_settings_screenrecord_mq_label">Запись экрана MQ</string>
+    <string name="quick_settings_screenrecord_hq_label">Запись экрана HQ</string>
 </resources>
