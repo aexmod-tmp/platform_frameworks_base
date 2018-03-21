@@ -52,7 +52,7 @@
               android:layout_marginLeft="4dp"
               android:layout_marginRight="4dp"
               android:textAppearance="?attr/textAppearanceSmall"
-              android:textColor="?attr/textColorPrimary"
+              android:textColor="@color/resolver_text1"
               android:textSize="12sp"
               android:fontFamily="sans-serif-condensed"
               android:gravity="top|center_horizontal"
@@ -62,6 +62,7 @@
     <!-- Extended activity info to distinguish between duplicate activity names -->
     <TextView android:id="@android:id/text2"
               android:textAppearance="?android:attr/textAppearanceSmall"
+              android:textColor="@color/resolver_text2"
               android:textSize="12sp"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"

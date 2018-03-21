@@ -24,6 +24,7 @@
     android:text="@string/use_a_different_app"
     android:minHeight="56dp"
     android:textAppearance="?android:attr/textAppearanceMedium"
+    android:textColor="@color/resolver_text1"
     android:gravity="start|center_vertical"
     android:paddingStart="16dp"
     android:paddingEnd="16dp"

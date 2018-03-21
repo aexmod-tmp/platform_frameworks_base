@@ -15,6 +15,9 @@
 
     <!-- Resolver -->
     <color name="resolver_list_bg">@color/white</color>
+    <color name="resolver_text_button">@color/accent_device_default_light</color>
+    <color name="resolver_text1">@color/accent_device_default_light</color>
+    <color name="resolver_text2">@color/accent_device_default_light</color>
 
     <!-- Immersive cling -->
     <color name="immersive_cling_bg_color">@color/accent_device_default_light</color>

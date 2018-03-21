@@ -50,13 +50,14 @@
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:textAppearance="?attr/textAppearanceMedium"
-                  android:textColor="?attr/textColorPrimary"
+                  android:textColor="@color/resolver_text1"
                   android:minLines="1"
                   android:maxLines="1"
                   android:ellipsize="marquee" />
         <!-- Extended activity info to distinguish between duplicate activity names -->
         <TextView android:id="@android:id/text2"
                   android:textAppearance="?android:attr/textAppearanceSmall"
+		  android:textColor="@color/resolver_text2"
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:minLines="1"

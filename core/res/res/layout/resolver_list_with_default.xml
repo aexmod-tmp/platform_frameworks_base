@@ -55,6 +55,7 @@
                 android:layout_height="?attr/listPreferredItemHeight"
                 android:layout_marginStart="16dp"
                 android:textAppearance="?attr/textAppearanceMedium"
+                android:textColor="@color/resolver_text2"
                 android:gravity="start|center_vertical"
                 android:paddingEnd="16dp" />
 
@@ -89,7 +90,7 @@
                     android:layout_gravity="start|center_vertical"
                     android:layout_marginEnd="?attr/listPreferredItemPaddingEnd"
                     android:textAppearance="?attr/textAppearanceButton"
-                    android:textColor="?attr/textColorPrimary"
+                    android:textColor="@color/resolver_text1"
                     android:minLines="1"
                     android:maxLines="1"
                     android:ellipsize="marquee" />
