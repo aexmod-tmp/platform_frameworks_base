@@ -51,6 +51,8 @@ applications that come with the platform
         <permission name="android.permission.GET_ACCOUNTS_PRIVILEGED"/>
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
         <permission name="android.permission.STOP_APP_SWITCHES"/>
+	<permission name="android.permission.INTERACT_ACROSS_USERS"/>
+        <permission name="android.permission.STATUS_BAR"/>
         <permission name="com.android.voicemail.permission.READ_VOICEMAIL"/>
         <permission name="com.android.voicemail.permission.WRITE_VOICEMAIL"/>
     </privapp-permissions>
@@ -103,6 +105,7 @@ applications that come with the platform
 
     <privapp-permissions package="com.android.musicfx">
         <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"/>
+	<permission name="android.permission.MODIFY_AUDIO_ROUTING"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.networkrecommendation">
@@ -130,6 +133,7 @@ applications that come with the platform
     </privapp-permissions>
 
     <privapp-permissions package="com.android.phone">
+	<permission name="android.permission.OVERRIDE_WIFI_CONFIG"/>
         <permission name="android.permission.ACCESS_IMS_CALL_SERVICE"/>
         <permission name="android.permission.BIND_CARRIER_MESSAGING_SERVICE"/>
         <permission name="android.permission.BIND_CARRIER_SERVICES"/>
@@ -222,6 +226,7 @@ applications that come with the platform
         <permission name="android.permission.ACCESS_NOTIFICATIONS"/>
         <permission name="android.permission.BACKUP"/>
         <permission name="android.permission.BATTERY_STATS"/>
+	<permission name="android.permission.RESET_BATTERY_STATS"/>
         <permission name="android.permission.BLUETOOTH_PRIVILEGED"/>
         <permission name="android.permission.CHANGE_CONFIGURATION"/>
         <permission name="android.permission.DELETE_PACKAGES"/>
@@ -346,6 +351,12 @@ applications that come with the platform
         <permission name="android.permission.WRITE_DREAM_STATE"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
+	<permission name="android.permission.FORCE_STOP_PACKAGES"/>
+        <permission name="android.permission.PACKAGE_USAGE_STATS"/>
+        <permission name="android.permission.REBOOT"/>
+        <permission name="android.permission.RECOVERY"/>
+        <permission name="android.permission.SHUTDOWN"/>
+        <permission name="com.android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.tv">
