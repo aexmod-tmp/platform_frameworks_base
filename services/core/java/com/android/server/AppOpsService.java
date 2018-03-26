@@ -743,6 +743,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         ArrayList<Callback> repCbs = null;
         code = AppOpsManager.opToSwitch(code);
         synchronized (this) {
+            UidState uidState = getUidStateLocked(uid, false);
             Op op = getOpLocked(code, uid, packageName, true);
             if (op != null) {
                 if (op.mode != mode) {
@@ -1119,7 +1120,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     public int checkPackage(int uid, String packageName) {
         Preconditions.checkNotNull(packageName);
         synchronized (this) {
-            if (packageName != null && getOpsRawLocked(uid, packageName, true) != null) {
+            if (getOpsRawLocked(uid, packageName, true) != null) {
                 return AppOpsManager.MODE_ALLOWED;
             } else {
                 return AppOpsManager.MODE_ERRORED;
@@ -1172,6 +1173,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
             Op op = getOpLocked(ops, code, true);
             if (isOpRestrictedLocked(uid, code, packageName)) {
+                op.ignoredCount++;
                 return AppOpsManager.MODE_IGNORED;
             }
             if (op.duration == -1) {
@@ -1200,6 +1202,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                            + switchCode + " (" + code + ") uid " + uid + " package "
                            + packageName);
                     op.rejectTime = System.currentTimeMillis();
+                    op.ignoredCount++;
                     return switchOp.mode;
                 } else if (switchOp.mode == AppOpsManager.MODE_ASK) {
                     if (Looper.myLooper() == mLooper) {
@@ -1295,6 +1298,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
             Op op = getOpLocked(ops, code, true);
             if (isOpRestrictedLocked(uid, code, resolvedPackageName)) {
+                op.ignoredCount++;
                 return AppOpsManager.MODE_IGNORED;
             }
             final int switchCode = AppOpsManager.opToSwitch(code);
@@ -1316,6 +1320,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         + switchCode + " (" + code + ") uid " + uid + " package "
                         + resolvedPackageName);
                 op.rejectTime = System.currentTimeMillis();
+                op.ignoredCount++;
                 return switchOp.mode;
             } else if (switchOp.mode == AppOpsManager.MODE_ALLOWED) {
                 if (DEBUG) Log.d(TAG, "startOperation: allowing code " + code
@@ -1777,7 +1782,14 @@ public class AppOpsService extends IAppOpsService.Stub {
                 if (proxyPackageName != null) {
                     op.proxyPackageName = proxyPackageName;
                 }
-
+                String allowed = parser.getAttributeValue(null, "ac");
+                if (allowed != null) {
+                    op.allowedCount = Integer.parseInt(allowed);
+                }
+                String ignored = parser.getAttributeValue(null, "ic");
+                if (ignored != null) {
+                    op.ignoredCount = Integer.parseInt(ignored);
+                }
                 UidState uidState = getUidStateLocked(uid, true);
                 if (uidState.pkgOps == null) {
                     uidState.pkgOps = new ArrayMap<>();
@@ -1799,6 +1811,8 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     void writeState() {
         synchronized (mFile) {
+            List<AppOpsManager.PackageOps> allOps = getPackagesForOps(null);
+
             FileOutputStream stream;
             try {
                 stream = mFile.startWrite();
@@ -1807,33 +1821,15 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return;
             }
 
-            SparseArray<UidState> outUidStates = null;
-            synchronized (this) {
-                final int uidStateCount = mUidStates.size();
-                for (int i = 0; i < uidStateCount; i++) {
-                    UidState uidState = mUidStates.valueAt(i);
-                    SparseIntArray opModes = uidState.opModes;
-                    if (opModes != null && opModes.size() > 0) {
-                        UidState outUidState = new UidState(uidState.uid);
-                        outUidState.opModes = opModes.clone();
-                        if (outUidStates == null) {
-                            outUidStates = new SparseArray<>();
-                        }
-                        outUidStates.put(mUidStates.keyAt(i), outUidState);
-                    }
-                }
-            }
-            List<AppOpsManager.PackageOps> allOps = getPackagesForOps(null);
-
             try {
                 XmlSerializer out = new FastXmlSerializer();
                 out.setOutput(stream, StandardCharsets.UTF_8.name());
                 out.startDocument(null, true);
                 out.startTag(null, "app-ops");
 
-                final int uidStateCount = outUidStates != null ? outUidStates.size() : 0;
+                final int uidStateCount = mUidStates.size();
                 for (int i = 0; i < uidStateCount; i++) {
-                    UidState uidState = outUidStates.valueAt(i);
+                    UidState uidState = mUidStates.valueAt(i);
                     if (uidState.opModes != null && uidState.opModes.size() > 0) {
                         out.startTag(null, "uid");
                         out.attribute(null, "n", Integer.toString(uidState.uid));
@@ -1907,6 +1903,14 @@ public class AppOpsService extends IAppOpsService.Stub {
                             String proxyPackageName = op.getProxyPackageName();
                             if (proxyPackageName != null) {
                                 out.attribute(null, "pp", proxyPackageName);
+                            }
+                            int allowed = op.getAllowedCount();
+                            if (allowed != 0) {
+                                out.attribute(null, "ac", Integer.toString(allowed));
+                            }
+                            int ignored = op.getIgnoredCount();
+                            if (ignored != 0) {
+                                out.attribute(null, "ic", Integer.toString(ignored));
                             }
                             out.endTag(null, "op");
                         }

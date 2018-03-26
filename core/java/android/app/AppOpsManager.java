@@ -263,6 +263,7 @@ public class AppOpsManager {
     public static final int OP_INSTANT_APP_START_FOREGROUND = 68;
     /** @hide Answer incoming phone calls */
     public static final int OP_ANSWER_PHONE_CALLS = 69;
+
     /** @hide Wifi state change */
     public static final int OP_CHANGE_WIFI_STATE = 70;
     /** @hide Bluetooth state change */
@@ -398,16 +399,13 @@ public class AppOpsManager {
             = "android:boot_completed";
     private static final String OPSTR_NFC_CHANGE
             = "android:nfc_change";
-
-    // Warning: If an permission is added here it also has to be added to
-    // com.android.packageinstaller.permission.utils.EventLogger
-    /** @hide */
-    public static final String OPSTR_AUTO_START = "android:auto_start";
     private static final String OPSTR_DATA_CONNECT_CHANGE
             = "android:data_connect_change";
 
     // Warning: If an permission is added here it also has to be added to
     // com.android.packageinstaller.permission.utils.EventLogger
+    /** @hide */
+    public static final String OPSTR_AUTO_START = "android:auto_start";
     private static final int[] RUNTIME_AND_APPOP_PERMISSIONS_OPS = {
             // RUNTIME PERMISSIONS
             // Contacts
@@ -1365,6 +1363,9 @@ public class AppOpsManager {
                 sPermToOp.put(sOpPerms[op], op);
             }
         }
+        for (int i=0; i<_NUM_OP; i++) {
+            sNameToOp.put(sOpNames[i], i);
+        }
     }
 
     /**
@@ -1535,7 +1536,7 @@ public class AppOpsManager {
         private final int mDuration;
         private final int mProxyUid;
         private final String mProxyPackageName;
-	private final int mAllowedCount;
+        private final int mAllowedCount;
         private final int mIgnoredCount;
 
         public OpEntry(int op, int mode, long time, long rejectTime, int duration,
@@ -1547,7 +1548,7 @@ public class AppOpsManager {
             mDuration = duration;
             mProxyUid = proxyUid;
             mProxyPackageName = proxyPackage;
-	    mAllowedCount = allowedCount;
+            mAllowedCount = allowedCount;
             mIgnoredCount = ignoredCount;
         }
 
@@ -1583,7 +1584,7 @@ public class AppOpsManager {
             return mProxyPackageName;
         }
 
-	public int getAllowedCount() {
+        public int getAllowedCount() {
             return mAllowedCount;
         }
 
@@ -1605,7 +1606,7 @@ public class AppOpsManager {
             dest.writeInt(mDuration);
             dest.writeInt(mProxyUid);
             dest.writeString(mProxyPackageName);
-	    dest.writeInt(mAllowedCount);
+            dest.writeInt(mAllowedCount);
             dest.writeInt(mIgnoredCount);
         }
 
@@ -1617,7 +1618,7 @@ public class AppOpsManager {
             mDuration = source.readInt();
             mProxyUid = source.readInt();
             mProxyPackageName = source.readString();
-	    mAllowedCount = source.readInt();
+            mAllowedCount = source.readInt();
             mIgnoredCount = source.readInt();
         }
 
