@@ -387,9 +387,6 @@ public class ZygoteProcess {
             argsForZygote.add("--mount-external-write");
         }
         argsForZygote.add("--target-sdk-version=" + targetSdkVersion);
-        if (refreshFont) {
-            argsForZygote.add("--refresh-font");
-        }
 
         // --setgroups is a comma-separated list
         if (gids != null && gids.length > 0) {
