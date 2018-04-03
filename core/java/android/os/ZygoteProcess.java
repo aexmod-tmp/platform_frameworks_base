@@ -203,12 +203,11 @@ public class ZygoteProcess {
                                                   String instructionSet,
                                                   String appDataDir,
                                                   String invokeWith,
-                                                  String[] zygoteArgs,
-                                                  boolean refreshFont) {
+                                                  String[] zygoteArgs) {
         try {
             return startViaZygote(processClass, niceName, uid, gid, gids,
                     debugFlags, mountExternal, targetSdkVersion, seInfo,
-                    abi, instructionSet, appDataDir, invokeWith, zygoteArgs, refreshFont);
+                    abi, instructionSet, appDataDir, invokeWith, zygoteArgs);
         } catch (ZygoteStartFailedEx ex) {
             Log.e(LOG_TAG,
                     "Starting VM process through Zygote failed");
@@ -339,8 +338,7 @@ public class ZygoteProcess {
                                                       String instructionSet,
                                                       String appDataDir,
                                                       String invokeWith,
-                                                      String[] extraArgs,
-                                                      boolean refreshFont)
+                                                      String[] extraArgs)
                                                       throws ZygoteStartFailedEx {
         ArrayList<String> argsForZygote = new ArrayList<String>();
 

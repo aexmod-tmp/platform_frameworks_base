@@ -4033,12 +4033,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 startResult = startWebView(entryPoint,
                         app.processName, uid, uid, gids, debugFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
-                        app.info.dataDir, null, null, refreshFont);
+                        app.info.dataDir, null, entryPointArgs);
             } else {
                 startResult = Process.start(entryPoint,
                         app.processName, uid, uid, gids, debugFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
-                        app.info.dataDir, invokeWith, null, refreshFont);
+                        app.info.dataDir, invokeWith, entryPointArgs);
             }
             checkTime(startTime, "startProcess: returned from zygote!");
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
