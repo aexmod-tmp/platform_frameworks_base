@@ -4046,14 +4046,6 @@ public final class Settings {
         public static final String POCKET_JUDGE = "pocket_judge";
 
         /**
-         * Whether to use the MTP by default after connecting to PC
-         * @hide
-         */
-        public static final String MTP_DIRTY_HACK = "mtp_dirty_hack";
-        /** @hide */
-        public static final String MTP_DIRTY_HACK_SAVE = "mtp_dirty_hack_save";
-
-        /**
          * Whether the phone vibrates on call connect
          * @hide
          */
