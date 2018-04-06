@@ -4046,14 +4046,6 @@ public final class Settings {
         public static final String POCKET_JUDGE = "pocket_judge";
 
         /**
-         * Whether to use the MTP by default after connecting to PC
-         * @hide
-         */
-        public static final String MTP_DIRTY_HACK = "mtp_dirty_hack";
-        /** @hide */
-        public static final String MTP_DIRTY_HACK_SAVE = "mtp_dirty_hack_save";
-
-        /**
          * Whether the phone vibrates on call connect
          * @hide
          */
@@ -4669,7 +4661,15 @@ public final class Settings {
         public static final String G_FACE_UNLOCK_BYPASS = "g_face_unlock_bypass";
 
         /**
+         * Select various accents to go along with system themes
+         *
+         * @hide
+         */
+        public static final String ACCENT_PICKER = "accent_picker";
+
+        /**
          * Manual override menu button behavior on lockscreen
+         *
          * @hide
         **/
 
@@ -11826,6 +11826,16 @@ public final class Settings {
          */
         public static final String LOCATION_SETTINGS_LINK_TO_PERMISSIONS_ENABLED =
                 "location_settings_link_to_permissions_enabled";
+
+        /**
+         * @hide
+         */
+        public static final String USB_DEFAULT_CONFIGURATION = "usb_default_configuration";
+
+        /**
+         * @hide
+         */
+        public static final String USB_PARANOIA_CONNECT = "usb_paranoia_connect";
 
         /**
          * Flag to enable use of RefactoredBackupManagerService.
