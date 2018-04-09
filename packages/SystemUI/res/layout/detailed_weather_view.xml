@@ -210,7 +210,7 @@
             android:layout_height="40dp"
             android:orientation="horizontal"
             android:paddingStart="5dp"
-            android:paddingEnd="10dp">
+            android:paddingEnd="1dp">
 
             <TextView
                 android:id="@+id/current_weather_provider"
@@ -230,6 +230,13 @@
                 android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Weather.Detailed"
                 android:layout_weight="1"/>
 
+            <ImageView android:id="@+id/refresh"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center_vertical"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_menu_refresh"
+                android:background="?android:selectableItemBackgroundBorderless" />
         </LinearLayout>
     </LinearLayout>
 

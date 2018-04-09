@@ -86,6 +86,7 @@ public class DetailedWeatherView extends FrameLayout {
     private ImageView mEmptyViewImage;
     private View mWeatherLine;
     private TextView mProviderName;
+    private ImageView mRefresh;
 
     /** The background colors of the app, it changes thru out the day to mimic the sky. **/
     public static final String[] BACKGROUND_SPECTRUM = { "#212121", "#27232e", "#2d253a",
@@ -138,6 +139,17 @@ public class DetailedWeatherView extends FrameLayout {
         mEmptyViewImage = (ImageView) findViewById(R.id.empty_weather_image);
         mWeatherLine = findViewById(R.id.current_weather);
         mProviderName = (TextView) findViewById(R.id.current_weather_provider);
+
+        mRefresh = (ImageView) findViewById(R.id.refresh);
+        mRefresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mWeatherClient.isOmniJawsEnabled()) {
+                    startProgress();
+                    forceRefreshWeatherSettings();
+                }
+            }
+        });
 
         if (!mShowCurrent) {
             mCurrentView.setVisibility(View.GONE);
