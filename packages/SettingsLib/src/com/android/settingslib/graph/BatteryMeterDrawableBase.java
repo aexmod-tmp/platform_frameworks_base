@@ -97,7 +97,7 @@ public class BatteryMeterDrawableBase extends Drawable {
     private final float[] mPlusPoints;
     private final Path mPlusPath = new Path();
 
-    private final Rect mPadding = new Rect();
+    private final Rect mPadding = new Rect(); 
     private final RectF mFrame = new RectF();
     private final RectF mSquareFrame = new RectF();
     private final RectF mButtonFrame = new RectF();
@@ -552,9 +552,9 @@ public class BatteryMeterDrawableBase extends Drawable {
 
         if (!mCharging && !mPowerSaveEnabled) {
             if (level <= mCriticalLevel) {
-                // draw the warning text
+                mWarningTextPaint.setTextSize(height * 0.55f);
                 final float x = mWidth * 0.5f;
-                final float y = (mHeight + mWarningTextHeight) * 0.48f;
+                final float y = (mHeight + mWarningTextHeight) * 0.7f;
                 c.drawText(mWarningString, x, y, mWarningTextPaint);
             } else if (pctOpaque) {
                 // draw the percentage text
@@ -679,7 +679,6 @@ public class BatteryMeterDrawableBase extends Drawable {
         // calculate Y position for text
         Rect bounds = new Rect();
         mTextPaint.setTextSize(squareSize / 2f);
-        mWarningTextPaint.setTextSize(squareSize / 2f);
         int px = (mWidth - width) / 2;
         mTextPaint.getTextBounds("99", 0, "99".length(), bounds);
         float x = squareSize / 2.0f + px;
@@ -699,8 +698,7 @@ public class BatteryMeterDrawableBase extends Drawable {
                 pctText = String.valueOf(SINGLE_DIGIT_PERCENT ? (level/10) : level);
                 c.drawText(pctText, x, y, mTextPaint);
             } else if (!mCharging && !mPowerSaveEnabled) {
-                if (level <= mCriticalLevel) {
-                    // draw the warning text
+                if (level <= mCriticalLevel) {                                   
                     c.drawText(mWarningString, x, y, mWarningTextPaint);
                 }
             }
@@ -762,6 +760,29 @@ public class BatteryMeterDrawableBase extends Drawable {
                         mBoltFrame.top + mBoltPoints[1] * mBoltFrame.height());
             }
             c.drawPath(mBoltPath, mBoltPaint);
+        } else if (mPowerSaveEnabled) {
+            final float pw = mFrame.width() * 2 / 3;
+            final float pl = mFrame.left + (mFrame.width() - pw) / 2;
+            final float pt = mFrame.top + (mFrame.height() - pw) / 2;
+            final float pr = mFrame.right - (mFrame.width() - pw) / 2;
+            final float pb = mFrame.bottom - (mFrame.height() - pw) / 2;
+            if (mPlusFrame.left != pl || mPlusFrame.top != pt
+                    || mPlusFrame.right != pr || mPlusFrame.bottom != pb) {
+                mPlusFrame.set(pl, pt, pr, pb);
+                mPlusPath.reset();
+                mPlusPath.moveTo(
+                        mPlusFrame.left + mPlusPoints[0] * mPlusFrame.width(),
+                        mPlusFrame.top + mPlusPoints[1] * mPlusFrame.height());
+                for (int i = 2; i < mPlusPoints.length; i += 2) {
+                    mPlusPath.lineTo(
+                            mPlusFrame.left + mPlusPoints[i] * mPlusFrame.width(),
+                            mPlusFrame.top + mPlusPoints[i + 1] * mPlusFrame.height());
+                }
+                mPlusPath.lineTo(
+                        mPlusFrame.left + mPlusPoints[0] * mPlusFrame.width(),
+                        mPlusFrame.top + mPlusPoints[1] * mPlusFrame.height());
+            }
+            c.drawPath(mPlusPath, mPlusPaint);
         }
 
         // draw thin gray ring first
@@ -777,7 +798,7 @@ public class BatteryMeterDrawableBase extends Drawable {
         // compute percentage text
         float pctX = 0, pctY = 0;
         String pctText = null;
-        if (!mCharging) {
+        if (!mCharging && !mPowerSaveEnabled) {
             mTextPaint.setColor(getColorForLevel(level));
             final float full = 0.30f;
             final float nofull =  0.55f;
@@ -790,7 +811,6 @@ public class BatteryMeterDrawableBase extends Drawable {
                     : mWarningString;
             pctX = mWidth * 0.5f;
             pctY = (mHeight + mTextHeight) * 0.47f;
-
             c.drawText(pctText, pctX, pctY, mTextPaint);
         }
     }
