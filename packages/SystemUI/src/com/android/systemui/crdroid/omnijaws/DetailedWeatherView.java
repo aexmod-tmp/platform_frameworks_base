@@ -32,6 +32,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.VectorDrawable;
 import android.text.TextPaint;
+import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.ArraySet;
 import android.util.AttributeSet;
@@ -179,7 +180,7 @@ public class DetailedWeatherView extends FrameLayout {
     }
 
     public void updateWeatherData(OmniJawsClient.WeatherInfo weatherData) {
-        if (DEBUG) Log.d(TAG, "updateWeatherData");
+        if (DEBUG) Log.d(TAG, "updateWeatherData: "+weatherData.toString());
         mProgressContainer.setVisibility(View.GONE);
 
         if (weatherData == null || !mWeatherClient.isOmniJawsEnabled()) {
@@ -203,11 +204,11 @@ public class DetailedWeatherView extends FrameLayout {
         SimpleDateFormat sdf = new SimpleDateFormat(format);
         mWeatherTimestamp.setText(getResources().getString(R.string.omnijaws_service_last_update) + " " + sdf.format(timeStamp));
         if (mShowCurrent) {
-            mWeatherData.setText(weatherData.windSpeed + " " + weatherData.windUnits + " " + weatherData.pinWheel +" - " +
+            mWeatherData.setText(join(" ", weatherData.windSpeed, weatherData.windUnits, weatherData.pinWheel) + " - " +
                     weatherData.humidity);
         } else {
             mWeatherData.setText(weatherData.temp + weatherData.tempUnits + " - " +
-                    weatherData.windSpeed + " " + weatherData.windUnits + " " + weatherData.pinWheel +" - " +
+                    join(" ", weatherData.windSpeed, weatherData.windUnits, weatherData.pinWheel) +" - " +
                     weatherData.humidity);
         }
 
@@ -267,6 +268,28 @@ public class DetailedWeatherView extends FrameLayout {
         if (mWithBackgroundColor) {
             setBackgroundColor(getCurrentHourColor());
         }
+    }
+
+
+    private String join(CharSequence delimiter, String... tokens) {
+        StringBuilder sb = new StringBuilder();
+        boolean firstTime = true;
+        int len$ = tokens.length;
+
+        for(int i$ = 0; i$ < len$; ++i$) {
+            String token = tokens[i$];
+            if(token!=null && !token.isEmpty() && !token.trim().equals("null")) {
+                if (firstTime) {
+                    firstTime = false;
+                } else {
+                    sb.append(delimiter);
+                }
+
+                sb.append(token);
+            }
+        }
+
+        return sb.toString();
     }
 
     private Drawable overlay(Resources resources, Drawable image, String min, String max, String tempUnits) {
