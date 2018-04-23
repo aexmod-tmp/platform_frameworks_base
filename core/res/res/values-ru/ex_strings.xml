@@ -144,4 +144,13 @@
     <string name="animation_grow_shrink_right">Увеличение (вправо)</string>
     <string name="action_null">Пусто</string>
 
+    <!-- Profiles -->
+    <!-- Names of default profiles. -->
+    <string name="profileNameDefault">По умолчанию</string>
+    <string name="profileNameWork">Работа</string>
+    <string name="profileNameHome">Дом</string>
+    <string name="profileNameSilent">Без звука</string>
+    <string name="profileNameNight">Ночь</string>
+    <string name="profileNameAutomobile">За рулем</string>
+
 </resources>

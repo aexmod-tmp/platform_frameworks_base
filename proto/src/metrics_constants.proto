@@ -4609,5 +4609,7 @@ message MetricsEvent {
     EXTENSIONS = 1150;
     OMNI_QS_WEATHER = 1501;
     OMNI_QS_WEATHER_DETAILS = 1502;
+
+    SYSTEM_PROFILES = 1503;
   }
 }

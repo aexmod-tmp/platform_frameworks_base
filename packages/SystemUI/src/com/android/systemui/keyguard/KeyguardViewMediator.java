@@ -95,6 +95,9 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import com.android.internal.util.lineageos.app.Profile;
+import com.android.internal.util.lineageos.app.ProfileManager;
+
 /**
  * Mediates requests related to the keyguard.  This includes queries about the
  * state of the keyguard, power management events that effect whether the keyguard
@@ -207,6 +210,8 @@ public class KeyguardViewMediator extends SystemUI {
     private boolean mBootCompleted;
     private boolean mBootSendUserPresent;
     private boolean mShuttingDown;
+
+    private ProfileManager mProfileManager;
 
     /** High level access to the power manager for WakeLocks */
     private PowerManager mPM;
@@ -2168,5 +2173,27 @@ public class KeyguardViewMediator extends SystemUI {
         if (soundPath == null || mUnlockSoundId == 0) {
             Log.w(TAG, "failed to load unlock sound from " + soundPath);
         }
+    }
+
+    private boolean isProfileDisablingKeyguard() {
+        Profile profile = mProfileManager.getActiveProfile();
+        return profile != null &&
+                profile.getScreenLockMode().getValue() == Profile.LockMode.DISABLE;
+    }
+
+    private boolean isKeyguardDisabled(int userId) {
+        if (!mExternallyEnabled) {
+            if (DEBUG) Log.d(TAG, "isKeyguardDisabled: keyguard is disabled externally");
+            return true;
+        }
+        if (mLockPatternUtils.isLockScreenDisabled(userId)) {
+            if (DEBUG) Log.d(TAG, "isKeyguardDisabled: keyguard is disabled by setting");
+            return true;
+        }
+        if (isProfileDisablingKeyguard()) {
+            if (DEBUG) Log.d(TAG, "isKeyguardDisabled: keyguard is disabled by profile");
+            return true;
+        }
+        return false;
     }
 }
