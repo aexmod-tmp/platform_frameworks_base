@@ -4064,6 +4064,16 @@ public final class Settings {
         public static final String VIBRATE_ON_DISCONNECT = "vibrate_on_disconnect";
 
         /**
+         * @hide
+         */
+        public static final String FLASH_ON_CALL_WAITING = "flash_on_call_waiting";
+
+        /**
+         * @hide
+         */
+        public static final String FLASH_ON_CALLWAITING_DELAY = "flash_on_call_waiting_delay";
+
+        /**
          * Whether to show the battery info on the lockscreen while charging
          * @hide
          */
