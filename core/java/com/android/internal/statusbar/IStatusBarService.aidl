@@ -86,6 +86,9 @@ interface IStatusBarService
     void toggleCameraFlash();
     void restartUI();
 
+    void toggleCameraFlashOn();
+    void toggleCameraFlashOff();
+
     // Start DU methods
     void toggleRecentApps();
     void toggleSplitScreen();
