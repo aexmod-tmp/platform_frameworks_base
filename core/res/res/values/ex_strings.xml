@@ -173,4 +173,6 @@
     <string name="profileNameNight">Night</string>
     <string name="profileNameAutomobile">Automobile</string>
 
+    <string name="app_blacklist">Blacklist app</string>
 </resources>
+
