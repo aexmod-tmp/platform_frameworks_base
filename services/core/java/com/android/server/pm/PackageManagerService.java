@@ -9354,19 +9354,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private boolean checkVersionForProfileLI(PackageSetting ps, PackageParser.Package pkg) {
-        if (isUpgrade() && ps != null && pkg != null) {
-            if (ps.versionCode != pkg.mVersionCode) {
-                Slog.i(TAG, ps.name + " clear profile due to version change " +
-                    ps.versionCode + " != " + pkg.mVersionCode);
-                clearAppProfilesLIF(pkg, UserHandle.USER_ALL);
-                return true;
-            }
-            if (DEBUG_INSTALL) Slog.i(TAG, "Package " + ps.name + " keep profile");
-        }
-        return false;
-    }
-
     /**
      *  Traces a package scan.
      *  @see #scanPackageLI(File, int, int, long, UserHandle)
@@ -9651,9 +9638,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // Verify certificates against what was last scanned
         collectCertificatesLI(ps, pkg, scanFile, policyFlags);
-
-        // Reset profile if the application version is changed
-        checkVersionForProfileLI(ps, pkg);
 
         /*
          * A new system app appeared, but we already had a non-system one of the
@@ -19024,6 +19008,7 @@ public class PackageManagerService extends IPackageManager.Stub
         //   1) it is not forward locked.
         //   2) it is not on on an external ASEC container.
         //   3) it is not an instant app or if it is then dexopt is enabled via gservices.
+        //   4) it is not debuggable.
         //
         // Note that we do not dexopt instant apps by default. dexopt can take some time to
         // complete, so we skip this step during installation. Instead, we'll take extra time
@@ -19035,7 +19020,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 && !forwardLocked
                 && !pkg.applicationInfo.isExternalAsec()
                 && (!instantApp || Global.getInt(mContext.getContentResolver(),
-                Global.INSTANT_APP_DEXOPT_ENABLED, 0) != 0);
+                Global.INSTANT_APP_DEXOPT_ENABLED, 0) != 0)
+                && ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0);
 
         if (performDexopt) {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
