@@ -592,22 +592,14 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
 
         @Override
         public void onPress() {
-            /* wait for the dialog box to close */
-            try {
-                 Thread.sleep(1000); //1s
-            } catch (InterruptedException ie) {}
-            AEXUtils.takeScreenshot(true);
+            mHandler.sendMessageDelayed(Message.obtain(null, MESSAGE_SCREENSHOT, true), 1000);
         }
 
 
         @Override
         public boolean onLongPress() {
             mHandler.sendEmptyMessage(MESSAGE_DISMISS);
-            /* wait for the dialog box to close */
-            try {
-                 Thread.sleep(1000); //1s
-            } catch (InterruptedException ie) {}
-            AEXUtils.takeScreenshot(false);
+            mHandler.sendMessageDelayed(Message.obtain(null, MESSAGE_SCREENSHOT, false), 1000);
             return true;
         }
 
@@ -628,12 +620,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
 
             public void onPress() {
                 mHandler.sendEmptyMessage(MESSAGE_DISMISS);
-                /* wait for the dialog box to close */
-                try {
-                     Thread.sleep(1000); //1s
-                } catch (InterruptedException ie) {}
-
-                takeScreenrecord();
+                mHandler.sendEmptyMessageDelayed(MESSAGE_SCREENRECORD, 1000);
             }
 
             public boolean showDuringKeyguard() {
@@ -1589,6 +1576,8 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
     private static final int MESSAGE_SHOW = 2;
     private static final int MESSAGE_SHOW_ADVANCED_TOGGLES = 3;
     private static final int DIALOG_DISMISS_DELAY = 300; // ms
+    private static final int MESSAGE_SCREENSHOT = 4;
+    private static final int MESSAGE_SCREENRECORD = 5;
 
     private Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
@@ -1610,6 +1599,12 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
                     mAdapter.notifyDataSetChanged();
                     addNewItems();
                     mDialog.refreshList();
+                    break;
+                case MESSAGE_SCREENSHOT:
+                    AEXUtils.takeScreenshot((Boolean) msg.obj);
+                    break;
+                case MESSAGE_SCREENRECORD:
+                    takeScreenrecord();
                     break;
             }
         }
