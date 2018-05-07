@@ -249,7 +249,7 @@ import com.android.internal.policy.IKeyguardService;
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.PhoneWindow;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.internal.util.nitrogen.NitrogenUtils;
+import com.android.internal.util.aospextended.AEXUtils;
 import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.utils.du.ActionHandler;
 import com.android.internal.utils.du.DUActionUtils;
@@ -1023,7 +1023,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_TOGGLE_TORCH:
                     performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, true);
-                    NitrogenUtils.toggleCameraFlash();
+                    AEXUtils.toggleCameraFlash();
                     break;
                 case MSG_DISPATCH_VOLKEY_WITH_WAKE_LOCK: {
                     KeyEvent event = (KeyEvent) msg.obj;
@@ -1662,7 +1662,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case MULTI_PRESS_POWER_NOTHING:
                 if ((mTorchActionMode == 1) && (!isScreenOn() || isDozeMode())) {
                     performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, true);
-                    NitrogenUtils.toggleCameraFlash();
+                    AEXUtils.toggleCameraFlash();
                 }
                 break;
             case MULTI_PRESS_POWER_THEATER_MODE:

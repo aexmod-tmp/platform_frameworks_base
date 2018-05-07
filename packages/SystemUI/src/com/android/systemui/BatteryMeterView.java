@@ -25,15 +25,12 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.net.Uri;
 import android.provider.Settings;
-import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -48,7 +45,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
-import com.android.systemui.statusbar.policy.IconLogger;
 
 import java.text.NumberFormat;
 
@@ -193,7 +189,7 @@ public class BatteryMeterView extends LinearLayout implements
     @Override
     public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
 
-        if (isCircleBattery()) {
+        if (isCircleOrSquareBattery()) {
             mForceShowPercent = pluggedIn;
             updateShowPercent();
         }
@@ -207,11 +203,12 @@ public class BatteryMeterView extends LinearLayout implements
                         : R.string.accessibility_battery_level, level));
     }
 
-    private boolean isCircleBattery() {
+    private boolean isCircleOrSquareBattery() {
         return mStyle == BatteryMeterDrawableBase.BATTERY_STYLE_BIG_CIRCLE
                 || mStyle == BatteryMeterDrawableBase.BATTERY_STYLE_BIG_DOTTED_CIRCLE
                 || mStyle == BatteryMeterDrawableBase.BATTERY_STYLE_CIRCLE
-                || mStyle == BatteryMeterDrawableBase.BATTERY_STYLE_DOTTED_CIRCLE;
+                || mStyle == BatteryMeterDrawableBase.BATTERY_STYLE_DOTTED_CIRCLE
+                || mStyle == BatteryMeterDrawableBase.BATTERY_STYLE_SQUARE;
     }
 
     private boolean isRightClock() {
@@ -304,7 +301,7 @@ public class BatteryMeterView extends LinearLayout implements
 
         LinearLayout.LayoutParams scaledLayoutParams = new LinearLayout.LayoutParams(
                 (int) (batteryWidth * iconScaleFactor), (int) (batteryHeight * iconScaleFactor));
-        scaledLayoutParams.setMargins(0, 0, isCircleBattery() && isRightClock()
+        scaledLayoutParams.setMargins(0, 0, isCircleOrSquareBattery() && isRightClock()
                 ? mEndPadding : 0, marginBottom);
 
         if (mBatteryIconView != null) {
@@ -383,7 +380,7 @@ public class BatteryMeterView extends LinearLayout implements
         }
 
         if (forcePercentageQsHeader()
-                || style == BatteryMeterDrawableBase.BATTERY_STYLE_TEXT || (isCircleBattery() && mCharging)) {
+                || style == BatteryMeterDrawableBase.BATTERY_STYLE_TEXT || (isCircleOrSquareBattery() && mCharging)) {
             mForceShowPercent = true;
         } else {
             mForceShowPercent = false;
