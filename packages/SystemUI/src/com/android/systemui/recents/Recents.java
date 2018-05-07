@@ -219,6 +219,12 @@ public class Recents extends SystemUI
         return mIconsHandler;
     }
 
+    public void setCurrentIconPack(String currentIconPack) {
+        if (mIconsHandler != null) {
+            mIconsHandler.updatePrefs(currentIconPack);
+        }
+    }
+
     @Override
     public void start() {
         mIconsHandler = new IconsHandler(
@@ -227,7 +233,7 @@ public class Recents extends SystemUI
         sSystemServicesProxy = SystemServicesProxy.getInstance(mContext);
         sConfiguration = new RecentsConfiguration(mContext);
         mConfiguration = new Configuration(Utilities.getAppConfiguration(mContext));
-        sTaskLoader = new RecentsTaskLoader(mContext, mIconsHandler);
+        sTaskLoader = new RecentsTaskLoader(mContext);
         mHandler = new Handler();
         mImpl = new RecentsImpl(mContext);
 
@@ -263,6 +269,13 @@ public class Recents extends SystemUI
     @Override
     public void onBootCompleted() {
         mImpl.onBootCompleted();
+        mIconsHandler = new IconsHandler(
+                mContext, R.dimen.recents_task_view_header_height_tablet_land, 1.0f);
+        resetIconCache();
+        setCurrentIconPack(
+                Settings.System.getStringForUser(mContext.getContentResolver(),
+                Settings.System.RECENTS_ICON_PACK, sSystemServicesProxy.getCurrentUser()));
+        sTaskLoader.setIconsHandler(mIconsHandler);
     }
 
     /**
