@@ -49,12 +49,8 @@ class DecorContext extends ContextThemeWrapper {
     public Object getSystemService(String name) {
         if (Context.WINDOW_SERVICE.equals(name)) {
             if (mWindowManager == null) {
-                WindowManagerImpl wm = (mPhoneWindow != null)
-                    ? (WindowManagerImpl) mPhoneWindow.getWindowManager()
-                    : null;
-                if (wm == null) {
-                    wm = (WindowManagerImpl) super.getSystemService(Context.WINDOW_SERVICE);
-                }
+                WindowManagerImpl wm =
+                        (WindowManagerImpl) super.getSystemService(Context.WINDOW_SERVICE);
                 mWindowManager = wm.createLocalWindowManager(mPhoneWindow);
             }
             return mWindowManager;
