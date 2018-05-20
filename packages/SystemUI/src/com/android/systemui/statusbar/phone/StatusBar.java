@@ -7200,9 +7200,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 rebuildRecentsScreen();
                 mSlimRecents.addSbCallbacks();
             }
-        } else {            
-            if (mSlimRecents != null) {
-                mRecents.addSbCallbacks();
+        } else {
+            mRecents.addSbCallbacks();            
+            if (mSlimRecents != null) {                
                 mSlimRecents.evictAllCaches();
                 mSlimRecents.removeSbCallbacks();
                 mSlimRecents = null;
