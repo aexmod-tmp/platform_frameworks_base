@@ -4961,6 +4961,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             });
             thread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
             thread.start();
+
+            if (mSlimRecents != null) {
+                mSlimRecents.refreshCachedPackage(pkg, state == PackageState.PACKAGE_REMOVED);
+            }
         }
     }
 
@@ -6975,6 +6979,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     Settings.System.USE_SLIM_RECENTS),
                     false, this, UserHandle.USER_ALL);
             update();
+            updateRecentsMode();
         }
 
         @Override
@@ -7001,7 +7006,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 setForceAmbient();
             } else if (uri.equals(Settings.System.getUriFor(
                     Settings.System.QS_QUICKBAR_SCROLL_ENABLED))) {
-		setQSScroller();
+		        setQSScroller();
             } else if (uri.equals(Settings.System.getUriFor(
                     Settings.System.RECENTS_ICON_PACK))) {
                 updateRecentsIconPack();
@@ -7018,28 +7023,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                         mBatterySaverWarningColor = Utils.getColorAttr(mContext, android.R.attr.colorError);
                         }
             } else if (uri.equals(Settings.System.getUriFor(
-                    Settings.System.LOCKSCREEN_MEDIA_METADATA))) {
-                setLockscreenMediaMetadata();
-            } else if (uri.equals(Settings.System.getUriFor(Settings.System.QS_ROWS_PORTRAIT)) ||
-                    uri.equals(Settings.System.getUriFor(Settings.System.QS_ROWS_LANDSCAPE)) ||
-                    uri.equals(Settings.System.getUriFor(Settings.System.QS_COLUMNS_PORTRAIT)) ||
-                    uri.equals(Settings.System.getUriFor(Settings.System.QS_COLUMNS_LANDSCAPE))) {
-                setQsRowsColumns();
-            } else if (uri.equals(Settings.System.getUriFor(
-                    Settings.System.HEADS_UP_STOPLIST_VALUES))) {
-                final String stopString = Settings.System.getString(mContext.getContentResolver(),
-                        Settings.System.HEADS_UP_STOPLIST_VALUES);
-                splitAndAddToArrayList(mStoplist, stopString, "\\|");
-            } else if (uri.equals(Settings.System.getUriFor(
-                    Settings.System.HEADS_UP_BLACKLIST_VALUES))) {
-                final String blackString = Settings.System.getString(mContext.getContentResolver(),
-                        Settings.System.HEADS_UP_BLACKLIST_VALUES);
-                splitAndAddToArrayList(mBlacklist, blackString, "\\|");
-            } else if (uri.equals(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_SHOW_TICKER))) {
-                updateTickerSettings();
-                initTickerView();
-            } else if (uri.equals(Settings.System.getUriFor(
                     Settings.System.RECENTS_ICON_PACK))) {
                 updateRecentsIconPack();
             } else if (uri.equals(Settings.System.getUriFor(
@@ -7053,7 +7036,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             ContentResolver resolver = mContext.getContentResolver();
             boolean mShow4G = Settings.System.getIntForUser(resolver,
                     Settings.System.SHOW_FOURG, 0, UserHandle.USER_CURRENT) == 1;
-	    setLockscreenDoubleTapToSleep();
+	        setLockscreenDoubleTapToSleep();
             setStatusDoubleTapToSleep();
             setLockscreenMediaMetadata();
             updateQsPanelResources();
@@ -7066,8 +7049,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 	        setQSScroller();
             updateRecentsIconPack();
             updateBatterySettings();
-            updateTickerAnimation();
-            updateRecentsMode();
+            updateTickerAnimation();            
         }
     }
 
@@ -7192,15 +7174,17 @@ public class StatusBar extends SystemUI implements DemoMode,
     private void updateRecentsMode() {
         boolean slimRecents = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.USE_SLIM_RECENTS, 0, mCurrentUserId) == 1;
-        if (slimRecents) {
-            mRecents.evictAllCaches();
-            mRecents.removeSbCallbacks();
-            mSlimRecents = new RecentController(mContext);
-            rebuildRecentsScreen();
-            mSlimRecents.addSbCallbacks();
-        } else {
-            mRecents.addSbCallbacks();
+        if (slimRecents) {            
+            if(mSlimRecents==null){
+                mRecents.evictAllCaches();
+                mRecents.removeSbCallbacks();
+                mSlimRecents = new RecentController(mContext);
+                rebuildRecentsScreen();
+                mSlimRecents.addSbCallbacks();
+            }
+        } else {            
             if (mSlimRecents != null) {
+                mRecents.addSbCallbacks();
                 mSlimRecents.evictAllCaches();
                 mSlimRecents.removeSbCallbacks();
                 mSlimRecents = null;
