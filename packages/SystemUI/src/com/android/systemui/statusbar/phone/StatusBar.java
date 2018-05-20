@@ -37,8 +37,10 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityOptions;
+import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
@@ -81,6 +83,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
@@ -216,10 +219,11 @@ import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.AppTransitionFinishedEvent;
 import com.android.systemui.recents.events.activity.UndockingTaskEvent;
-import com.android.systemui.recents.misc.IconPackHelper;
+import com.android.systemui.slimrecent.icons.IconsHandler;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.screenshot.GlobalScreenshot;
+import com.android.systemui.slimrecent.RecentController;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.stackdivider.WindowManagerProxy;
 import com.android.systemui.statusbar.ActivatableNotificationView;
@@ -710,6 +714,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 getMediaControllerPlaybackState(mMediaController)) {
             tickTrackInfo(mMediaController);
             final String currentPkg = mMediaController.getPackageName().toLowerCase();
+            if (mSlimRecents != null) {
+                mSlimRecents.setMediaPlaying(true, currentPkg);
+            }
             for (String packageName : mNavMediaArrowsExcludeList) {
                 if (currentPkg.contains(packageName)) {
                     return;
@@ -725,6 +732,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
             if (mNavigationBar != null) {
                 mNavigationBar.setMediaPlaying(false);
+            }
+            if (mSlimRecents != null) {
+                mSlimRecents.setMediaPlaying(false, "");
             }
         }
     }
@@ -1862,8 +1872,19 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         int dockSide = WindowManagerProxy.getInstance().getDockSide();
         if (dockSide == WindowManager.DOCKED_INVALID) {
-            return mRecents.dockTopTask(NavigationBarGestureHelper.DRAG_MODE_NONE,
-                    ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, null, metricsDockAction);
+            boolean isInLockTaskMode = false;
+            try {
+                IActivityManager activityManager = ActivityManagerNative.getDefault();
+                if (activityManager.isInLockTaskMode()) {
+                    isInLockTaskMode = true;
+                }
+            } catch (RemoteException e) {}
+            if (mSlimRecents != null && !isInLockTaskMode) {
+                mSlimRecents.startMultiWindow();
+            } else {
+                return mRecents.dockTopTask(NavigationBarGestureHelper.DRAG_MODE_NONE,
+                        ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, null, metricsDockAction);
+            }
         } else {
             Divider divider = getComponent(Divider.class);
             if (divider != null && divider.isMinimized() && !divider.isHomeStackResizable()) {
@@ -1978,11 +1999,21 @@ public class StatusBar extends SystemUI implements DemoMode,
         entry.row.setLowPriorityStateUpdated(false);
 
         if (mEntryToRefresh == entry) {
+            final Notification n = entry.notification.getNotification();
+            final int[] colors = {n.backgroundColor, n.foregroundColor,
+                    n.primaryTextColor, n.secondaryTextColor};
             if (mNavigationBar != null) {
-                Notification n = entry.notification.getNotification();
-                int[] colors = {n.backgroundColor, n.foregroundColor,
-                        n.primaryTextColor, n.secondaryTextColor};
                 mNavigationBar.setPulseColors(n.isColorizedMedia(), colors);
+            }
+            if (mSlimRecents != null) {
+                Icon icon = n.getOriginalLargeIcon();
+                Drawable drawable = null;
+                if (icon != null) {
+                    drawable = icon.loadDrawable(mContext);
+                }
+                String title = n.extras.getString(Notification.EXTRA_TITLE);
+                String text = n.extras.getString(Notification.EXTRA_TEXT);
+                mSlimRecents.setMedia(n.isColorizedMedia(), colors, drawable, mMediaMetadata, title, text);
             }
         }
     }
@@ -4584,6 +4615,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         updateRowStates();
         mScreenPinningRequest.onConfigurationChanged();
+
+        if (mSlimRecents != null) {
+            mSlimRecents.onConfigurationChanged(newConfig);
+        }
     }
 
     public void userSwitched(int newUserId) {
@@ -4921,6 +4956,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         Dependency.get(ConfigurationController.class).removeCallback(this);
     }
 
+    // From DUPackageMonitor (mPackageMonitor) util
     @Override
     public void onPackageChanged(String pkg, PackageState state) {
         if (state == PackageState.PACKAGE_REMOVED
@@ -4943,6 +4979,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             });
             thread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
             thread.start();
+
+            if (mSlimRecents != null) {
+                mSlimRecents.refreshCachedPackage(pkg, state == PackageState.PACKAGE_REMOVED);
+            }
         }
     }
 
@@ -6797,6 +6837,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected RecentsComponent mRecents;
 
+    protected RecentController mSlimRecents;
+
     protected int mZenMode;
 
     // which notification is currently being longpress-examined by the user
@@ -6951,7 +6993,11 @@ public class StatusBar extends SystemUI implements DemoMode,
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.BATTERY_SAVER_MODE_COLOR),
                     false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.USE_SLIM_RECENTS),
+                    false, this, UserHandle.USER_ALL);
             update();
+            updateRecentsMode();
         }
 
         @Override
@@ -6978,7 +7024,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 setForceAmbient();
             } else if (uri.equals(Settings.System.getUriFor(
                     Settings.System.QS_QUICKBAR_SCROLL_ENABLED))) {
-		setQSScroller();
+		        setQSScroller();
             } else if (uri.equals(Settings.System.getUriFor(
                     Settings.System.RECENTS_ICON_PACK))) {
                 updateRecentsIconPack();
@@ -6994,15 +7040,21 @@ public class StatusBar extends SystemUI implements DemoMode,
                     if (mBatterySaverWarningColor != 0) {
                         mBatterySaverWarningColor = Utils.getColorAttr(mContext, android.R.attr.colorError);
                         }
-        	    }
-        	    update();
+            } else if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.RECENTS_ICON_PACK))) {
+                updateRecentsIconPack();
+            } else if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.USE_SLIM_RECENTS))) {
+                updateRecentsMode();
+            }
+            update();
         }
 
         public void update() {
             ContentResolver resolver = mContext.getContentResolver();
             boolean mShow4G = Settings.System.getIntForUser(resolver,
                     Settings.System.SHOW_FOURG, 0, UserHandle.USER_CURRENT) == 1;
-	    setLockscreenDoubleTapToSleep();
+	        setLockscreenDoubleTapToSleep();
             setStatusDoubleTapToSleep();
             setLockscreenMediaMetadata();
             updateQsPanelResources();
@@ -7012,10 +7064,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             setQsPanelOptions();
             updateTheme();
             setForceAmbient();
-	    setQSScroller();
+	        setQSScroller();
             updateRecentsIconPack();
             updateBatterySettings();
-            updateTickerAnimation();
+            updateTickerAnimation();            
         }
     }
 
@@ -7127,10 +7179,42 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private void updateRecentsIconPack() {
-        String currentIconPack = Settings.System.getStringForUser(mContext.getContentResolver(),
-            Settings.System.RECENTS_ICON_PACK, mCurrentUserId);
-        IconPackHelper.getInstance(mContext).updatePrefs(currentIconPack);
-        mRecents.resetIconCache();
+        boolean slimRecents = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.USE_SLIM_RECENTS, 0, mCurrentUserId) == 1;
+        if (!slimRecents) {
+            String currentIconPack = Settings.System.getStringForUser(mContext.getContentResolver(),
+                Settings.System.RECENTS_ICON_PACK, mCurrentUserId);
+            mRecents.resetIconCache();
+            mRecents.getIconsHandler().updatePrefs(currentIconPack);
+        }
+    }
+
+    private void updateRecentsMode() {
+        boolean slimRecents = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.USE_SLIM_RECENTS, 0, mCurrentUserId) == 1;
+        if (slimRecents) {            
+            if(mSlimRecents==null){
+                mRecents.evictAllCaches();
+                mRecents.removeSbCallbacks();
+                mSlimRecents = new RecentController(mContext);
+                rebuildRecentsScreen();
+                mSlimRecents.addSbCallbacks();
+            }
+        } else {
+            mRecents.addSbCallbacks();            
+            if (mSlimRecents != null) {                
+                mSlimRecents.evictAllCaches();
+                mSlimRecents.removeSbCallbacks();
+                mSlimRecents = null;
+            }
+        }
+        updateRecentsIconPack();
+    }
+
+    private void rebuildRecentsScreen() {
+        if (mSlimRecents != null) {
+            mSlimRecents.rebuildRecentsScreen();
+        }
     }
 
     private boolean isAmbientContainerAvailable() {
