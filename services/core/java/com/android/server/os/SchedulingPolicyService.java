@@ -22,7 +22,6 @@ import android.os.ISchedulingPolicyService;
 import android.os.Process;
 import android.util.Log;
 
-import com.android.server.am.ActivityManagerService;
 /**
  * The implementation of the scheduling policy service interface.
  *
@@ -66,7 +65,8 @@ public class SchedulingPolicyService extends ISchedulingPolicyService.Stub {
         }
         try {
             // must be in this order or it fails the schedulability constraint
-            ActivityManagerService.scheduleAsFifoPriority(tid, prio, /*suppressLogs*/ true);
+            Process.setThreadScheduler(tid, Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK,
+                                       prio);
         } catch (RuntimeException e) {
             Log.e(TAG, "Failed setThreadScheduler: " + e);
             return PackageManager.PERMISSION_DENIED;
