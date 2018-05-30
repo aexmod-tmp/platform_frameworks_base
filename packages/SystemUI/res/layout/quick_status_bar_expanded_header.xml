@@ -47,6 +47,11 @@
 
     </LinearLayout>
 
+    <RelativeLayout
+        android:id="@+id/qs_header"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
     <include layout="@layout/quick_status_bar_header_system_icons" />
 
     <com.android.systemui.qs.HorizontalClippingLinearLayout
@@ -107,4 +112,5 @@
         android:textStyle="bold"
         android:visibility="invisible"/>
 
+ </RelativeLayout>
 </com.android.systemui.qs.QuickStatusBarHeader>
