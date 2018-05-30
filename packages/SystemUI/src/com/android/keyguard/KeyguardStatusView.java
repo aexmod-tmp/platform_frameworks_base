@@ -475,56 +475,51 @@ public class KeyguardStatusView extends GridLayout implements
         }
 
 	// Update clock and date styles
-	ContentResolver resolver = mContext.getContentResolver();
-
-	mClockSelection = Settings.System.getIntForUser(resolver,
-                Settings.System.LOCKSCREEN_CLOCK_SELECTION, 0, UserHandle.USER_CURRENT);
-    	mDateSelection = Settings.System.getIntForUser(resolver,
-                Settings.System.LOCKSCREEN_DATE_SELECTION, 0, UserHandle.USER_CURRENT);
-
-	mAnalogClockView = (CustomAnalogClock) findViewById(R.id.analog_clock_view);
-        mDeadPoolClockView = (DeadPoolAnalogClock) findViewById(R.id.deadpool_clock_view);
-
 	RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mKeyguardStatusArea.getLayoutParams();
         switch (mClockSelection) {
             case 0: // default digital
             default:
-                //mClockView.setVisibility(View.GONE);
+                mClockView.setVisibility(View.VISIBLE);
                 mAnalogClockView.setVisibility(View.GONE);
                 mDeadPoolClockView.setVisibility(View.GONE);
                 params.addRule(RelativeLayout.BELOW, R.id.clock_view);
                 mClockView.setSingleLine(true);
                 break;
             case 1: // digital (bold)
-                //mClockView.setVisibility(View.GONE);
+                mClockView.setVisibility(View.VISIBLE);
                 mAnalogClockView.setVisibility(View.GONE);
                 mDeadPoolClockView.setVisibility(View.GONE);
                 params.addRule(RelativeLayout.BELOW, R.id.clock_view);
                 mClockView.setSingleLine(true);
                 break;
             case 2: // analog
-                //mClockView.setVisibility(View.GONE);
+	        mAnalogClockView.setVisibility(View.VISIBLE);
+                mClockView.setVisibility(View.GONE);
                 mDeadPoolClockView.setVisibility(View.GONE);
+		mWeatherView.setVisibility(View.GONE);
                 params.addRule(RelativeLayout.BELOW, R.id.analog_clock_view);
                 break;
             case 3: // analog (deadpool)
-                //mClockView.setVisibility(View.GONE);
+		mDeadPoolClockView.setVisibility(View.VISIBLE);
                 mAnalogClockView.setVisibility(View.GONE);
                 mClockView.setVisibility(View.GONE);
+		mWeatherView.setVisibility(View.GONE);
                 params.addRule(RelativeLayout.BELOW, R.id.deadpool_clock_view);
                 break;
             case 4: // sammy
-                //mClockView.setVisibility(View.GONE);
+                mClockView.setVisibility(View.VISIBLE);
                 mAnalogClockView.setVisibility(View.GONE);
                 mDeadPoolClockView.setVisibility(View.GONE);
                 params.addRule(RelativeLayout.BELOW, R.id.clock_view);
+		mWeatherView.setVisibility(View.GONE);
                 mClockView.setSingleLine(false);
                 break;
             case 5: // sammy (bold)
-                //mClockView.setVisibility(!isDozeMode() ? (mShowClock ? View.VISIBLE : View.GONE) : View.VISIBLE);
+                mClockView.setVisibility(View.VISIBLE);
                 mAnalogClockView.setVisibility(View.GONE);
                 mDeadPoolClockView.setVisibility(View.GONE);
                 params.addRule(RelativeLayout.BELOW, R.id.clock_view);
+		mWeatherView.setVisibility(View.GONE);
                 mClockView.setSingleLine(false);
                 break;
          }
@@ -532,19 +527,19 @@ public class KeyguardStatusView extends GridLayout implements
 	 switch (mDateSelection) {
             case 0: // default
             default:
-                //mDateView.setVisibility(!isDozeMode() ? (mShowDate ? View.VISIBLE : View.GONE) : View.VISIBLE);
+                mDateView.setVisibility(View.VISIBLE);
                 mDateView.setBackgroundResource(0);
                 mDateView.setTypeface(Typeface.DEFAULT);
                 mDateView.setPadding(0,0,0,0);
                 break;
             case 1: // semi-transparent box
-                //mDateView.setVisibility(!isDozeMode() ? (mShowDate ? View.VISIBLE : View.GONE) : View.VISIBLE);
+                mDateView.setVisibility(View.VISIBLE);
                 mDateView.setBackground(getResources().getDrawable(R.drawable.date_box_str_border));
                 mDateView.setTypeface(Typeface.DEFAULT_BOLD);
                 mDateView.setPadding(40,20,40,20);
                 break;
             case 2: // semi-transparent box (round)
-                //mDateView.setVisibility(!isDozeMode() ? (mShowDate ? View.VISIBLE : View.GONE) : View.VISIBLE);
+                mDateView.setVisibility(View.VISIBLE);
                 mDateView.setBackground(getResources().getDrawable(R.drawable.date_str_border));
                 mDateView.setTypeface(Typeface.DEFAULT_BOLD);
                 mDateView.setPadding(40,20,40,20);
@@ -691,7 +686,6 @@ public class KeyguardStatusView extends GridLayout implements
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             ContentResolver resolver = mContext.getContentResolver();
-
             if (uri.equals(Settings.System.getUriFor(
                    Settings.System.LOCK_SCREEN_SHOW_WEATHER))) {
                 mShowWeather = Settings.System.getIntForUser(resolver,
@@ -701,6 +695,16 @@ public class KeyguardStatusView extends GridLayout implements
                    Settings.System.LOCK_SCREEN_WEATHER_CONDITION_ICON))) {
                 mShowConditionIcon = Settings.System.getIntForUser(resolver,
                     Settings.System.LOCK_SCREEN_WEATHER_CONDITION_ICON, 1, UserHandle.USER_CURRENT) == 1;
+                updateSettings();
+            } else if (uri.equals(Settings.System.getUriFor(
+                   Settings.System.LOCKSCREEN_CLOCK_SELECTION))) {
+                mClockSelection = Settings.System.getIntForUser(resolver,
+                    Settings.System.LOCKSCREEN_CLOCK_SELECTION, 0, UserHandle.USER_CURRENT);
+                updateSettings();
+            } else if (uri.equals(Settings.System.getUriFor(
+                   Settings.System.LOCKSCREEN_DATE_SELECTION))) {
+                mDateSelection = Settings.System.getIntForUser(resolver,
+                    Settings.System.LOCKSCREEN_DATE_SELECTION, 0, UserHandle.USER_CURRENT);
                 updateSettings();
             } else if (uri.equals(Settings.System.getUriFor(
                    Settings.System.LOCK_SCREEN_SHOW_WEATHER_LOCATION))) {
