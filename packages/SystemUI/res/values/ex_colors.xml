@@ -14,7 +14,6 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-
 <resources>
     <!-- Floating action button -->
 
@@ -61,5 +60,8 @@
      <!-- Recents Memory bar -->
     <color name="recents_memory_progress_overall">@*android:color/resize_shadow_start_color</color>
     <color name="recents_memory_progress_free">@*android:color/accent_device_default_light</color>
+
+    <!-- Power menu wallpaper tint off color -->
+    <color name="power_menu_wallpaper_tint_off_color">#80202020</color>
 </resources>
 
