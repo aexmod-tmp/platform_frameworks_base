@@ -675,7 +675,12 @@ public class KeyguardStatusView extends GridLayout implements
                   Settings.System.LOCK_SCREEN_WEATHER_CONDITION_ICON, 1, UserHandle.USER_CURRENT) == 1;
             mShowLocation = Settings.System.getIntForUser(resolver,
                   Settings.System.LOCK_SCREEN_SHOW_WEATHER_LOCATION, 1, UserHandle.USER_CURRENT) == 1;
-            queryAndUpdateWeather();
+            
+	    mClockSelection = Settings.System.getIntForUser(resolver,
+                    Settings.System.LOCKSCREEN_CLOCK_SELECTION, 0, UserHandle.USER_CURRENT);
+	    mDateSelection = Settings.System.getIntForUser(resolver,
+                    Settings.System.LOCKSCREEN_DATE_SELECTION, 0, UserHandle.USER_CURRENT);
+	    queryAndUpdateWeather();
         }
 
         void unobserve() {
