@@ -279,6 +279,9 @@ public class KeyguardStatusView extends GridLayout implements
         } else if (mClockSelection == 5) {
             mClockView.setFormat12Hour(Html.fromHtml("<strong>hh</strong><br>mm"));
             mClockView.setFormat24Hour(Html.fromHtml("<strong>kk</strong><br>mm"));
+	} else if (mClockSelection == 6) {
+	    mClockView.setFormat12Hour(Html.fromHtml("<strong>h:mm</strong>"));
+            mClockView.setFormat24Hour(Html.fromHtml("<strong>kk:mm</strong>"));
         } else {
             mClockView.setFormat12Hour("hh\nmm");
             mClockView.setFormat24Hour("kk\nmm");
@@ -476,6 +479,14 @@ public class KeyguardStatusView extends GridLayout implements
 
 	// Update clock and date styles
 	RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mKeyguardStatusArea.getLayoutParams();
+	if (mClockSelection == 6) {
+	    mClockView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                getResources().getDimensionPixelSize(R.dimen.widget_small_font_size));
+	} else {
+	    mClockView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                getResources().getDimensionPixelSize(R.dimen.widget_big_font_size));
+	}
+
         switch (mClockSelection) {
             case 0: // default digital
             default:
@@ -486,6 +497,7 @@ public class KeyguardStatusView extends GridLayout implements
                 mClockView.setSingleLine(true);
                 break;
             case 1: // digital (bold)
+	    case 6: // digital (small)
                 mClockView.setVisibility(View.VISIBLE);
                 mAnalogClockView.setVisibility(View.GONE);
                 mDeadPoolClockView.setVisibility(View.GONE);
@@ -507,13 +519,6 @@ public class KeyguardStatusView extends GridLayout implements
                 params.addRule(RelativeLayout.BELOW, R.id.deadpool_clock_view);
                 break;
             case 4: // sammy
-                mClockView.setVisibility(View.VISIBLE);
-                mAnalogClockView.setVisibility(View.GONE);
-                mDeadPoolClockView.setVisibility(View.GONE);
-                params.addRule(RelativeLayout.BELOW, R.id.clock_view);
-		mWeatherView.setVisibility(View.GONE);
-                mClockView.setSingleLine(false);
-                break;
             case 5: // sammy (bold)
                 mClockView.setVisibility(View.VISIBLE);
                 mAnalogClockView.setVisibility(View.GONE);
@@ -524,7 +529,7 @@ public class KeyguardStatusView extends GridLayout implements
                 break;
          }
 
-	 switch (mDateSelection) {
+	switch (mDateSelection) {
             case 0: // default
             default:
                 mDateView.setVisibility(View.VISIBLE);
