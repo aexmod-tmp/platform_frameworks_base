@@ -479,12 +479,35 @@ public class KeyguardStatusView extends GridLayout implements
 
 	// Update clock and date styles
 	RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mKeyguardStatusArea.getLayoutParams();
+
 	if (mClockSelection == 6) {
+	    // ClockView
 	    mClockView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                 getResources().getDimensionPixelSize(R.dimen.widget_small_font_size));
+
+	    // DateView
+            mDateView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+		getResources().getDimensionPixelSize(R.dimen.widget_label_small_font_size));
+
+            // OwnerInfo
+            if (mOwnerInfo != null) {
+            	mOwnerInfo.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                    getResources().getDimensionPixelSize(R.dimen.widget_label_small_font_size));
+            }
 	} else {
+	    // ClockView
 	    mClockView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                 getResources().getDimensionPixelSize(R.dimen.widget_big_font_size));
+
+	    // DateView
+            mDateView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                getResources().getDimensionPixelSize(R.dimen.widget_label_font_size));
+
+            // OwnerInfo
+            if (mOwnerInfo != null) {
+            	mOwnerInfo.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                    getResources().getDimensionPixelSize(R.dimen.widget_label_font_size));
+            }
 	}
 
         switch (mClockSelection) {
