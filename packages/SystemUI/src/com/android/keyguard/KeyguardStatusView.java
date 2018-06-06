@@ -61,6 +61,7 @@ import com.android.systemui.statusbar.policy.DateView;
 
 import android.widget.CustomAnalogClock;
 import android.widget.DeadPoolAnalogClock;
+import android.widget.SpideyAnalogClock;
 import android.widget.RelativeLayout;
 
 import java.util.Locale;
@@ -110,6 +111,7 @@ public class KeyguardStatusView extends GridLayout implements
 
     private CustomAnalogClock mAnalogClockView;
     private DeadPoolAnalogClock mDeadPoolClockView;
+    private SpideyAnalogClock mSpideyClockView;
 
     private boolean mShowWeather;
     private boolean mShowConditionIcon;
@@ -206,6 +208,7 @@ public class KeyguardStatusView extends GridLayout implements
         mAlarmStatusView = findViewById(R.id.alarm_status);
 	mAnalogClockView = findViewById(R.id.analog_clock_view);
         mDeadPoolClockView = findViewById(R.id.deadpool_clock_view);
+	mSpideyClockView = findViewById(R.id.spidey_clock_view);
         mDateView = findViewById(R.id.date_view);
         mClockView = findViewById(R.id.clock_view);
         mClockView.setShowCurrentUserTime(true);
@@ -224,7 +227,7 @@ public class KeyguardStatusView extends GridLayout implements
         mWeatherCurrentTemp = (TextView) findViewById(R.id.current_temp);
         mWeatherConditionText = (TextView) findViewById(R.id.condition);
 
-	mVisibleInDoze = new View[]{/*mBatteryDoze, */mClockView, mAnalogClockView, mDeadPoolClockView, mKeyguardStatusArea};
+	mVisibleInDoze = new View[]{/*mBatteryDoze, */mClockView, mAnalogClockView, mDeadPoolClockView, mSpideyClockView, mKeyguardStatusArea};
 
         boolean shouldMarquee = KeyguardUpdateMonitor.getInstance(mContext).isDeviceInteractive();
         setEnableMarquee(shouldMarquee);
@@ -256,6 +259,12 @@ public class KeyguardStatusView extends GridLayout implements
         deadpoollayoutParams.bottomMargin = getResources().getDimensionPixelSize(
                 R.dimen.bottom_text_spacing_digital);
         mDeadPoolClockView.setLayoutParams(deadpoollayoutParams);
+
+	// Spidey analog clock
+        MarginLayoutParams spideylayoutParams = (MarginLayoutParams) mSpideyClockView.getLayoutParams();
+        spideylayoutParams.bottomMargin = getResources().getDimensionPixelSize(
+                R.dimen.bottom_text_spacing_digital);
+        mSpideyClockView.setLayoutParams(spideylayoutParams);
 
         // DateView
         mDateView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(
@@ -521,6 +530,7 @@ public class KeyguardStatusView extends GridLayout implements
                 mClockView.setVisibility(View.VISIBLE);
                 mAnalogClockView.setVisibility(View.GONE);
                 mDeadPoolClockView.setVisibility(View.GONE);
+		mSpideyClockView.setVisibility(View.GONE);
                 params.addRule(RelativeLayout.BELOW, R.id.clock_view);
                 mClockView.setSingleLine(true);
                 break;
@@ -529,6 +539,7 @@ public class KeyguardStatusView extends GridLayout implements
                 mClockView.setVisibility(View.VISIBLE);
                 mAnalogClockView.setVisibility(View.GONE);
                 mDeadPoolClockView.setVisibility(View.GONE);
+		mSpideyClockView.setVisibility(View.GONE);
                 params.addRule(RelativeLayout.BELOW, R.id.clock_view);
                 mClockView.setSingleLine(true);
                 break;
@@ -536,6 +547,7 @@ public class KeyguardStatusView extends GridLayout implements
 	        mAnalogClockView.setVisibility(View.VISIBLE);
                 mClockView.setVisibility(View.GONE);
                 mDeadPoolClockView.setVisibility(View.GONE);
+		mSpideyClockView.setVisibility(View.GONE);
 		mWeatherView.setVisibility(View.GONE);
                 params.addRule(RelativeLayout.BELOW, R.id.analog_clock_view);
                 break;
@@ -543,6 +555,7 @@ public class KeyguardStatusView extends GridLayout implements
 		mDeadPoolClockView.setVisibility(View.VISIBLE);
                 mAnalogClockView.setVisibility(View.GONE);
                 mClockView.setVisibility(View.GONE);
+		mSpideyClockView.setVisibility(View.GONE);
 		mWeatherView.setVisibility(View.GONE);
                 params.addRule(RelativeLayout.BELOW, R.id.deadpool_clock_view);
                 break;
@@ -551,10 +564,18 @@ public class KeyguardStatusView extends GridLayout implements
                 mClockView.setVisibility(View.VISIBLE);
                 mAnalogClockView.setVisibility(View.GONE);
                 mDeadPoolClockView.setVisibility(View.GONE);
+		mSpideyClockView.setVisibility(View.GONE);
                 params.addRule(RelativeLayout.BELOW, R.id.clock_view);
 		mWeatherView.setVisibility(View.GONE);
                 mClockView.setSingleLine(false);
                 break;
+	    case 7: //analog (spidey)
+                mSpideyClockView.setVisibility(View.VISIBLE);
+                mAnalogClockView.setVisibility(View.GONE);
+                mClockView.setVisibility(View.GONE);
+                mDeadPoolClockView.setVisibility(View.GONE);
+		mWeatherView.setVisibility(View.GONE);
+                params.addRule(RelativeLayout.BELOW, R.id.spidey_clock_view);
          }
 
         switch (mDateSelection) {
@@ -674,6 +695,8 @@ public class KeyguardStatusView extends GridLayout implements
         mAlarmStatusView.setCompoundDrawableTintList(ColorStateList.valueOf(blendedAlarmColor));
 	mAnalogClockView.setDark(dark);
         mDeadPoolClockView.setDark(dark);
+        mSpideyClockView.setDark(dark);
+
     }
 
     public void setPulsing(boolean pulsing) {
