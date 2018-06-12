@@ -47,6 +47,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := $(addprefix services.,$(services)) \
 LOCAL_JAVA_LIBRARIES := \
     android.hidl.manager-V1.0-java
 
+
 ifeq ($(EMMA_INSTRUMENT_FRAMEWORK),true)
 LOCAL_EMMA_INSTRUMENT := true
 endif

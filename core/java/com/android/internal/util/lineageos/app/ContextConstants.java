@@ -24,27 +24,15 @@ import android.annotation.SdkConstant;
  */
 public final class ContextConstants {
 
-    /**
-     * @hide
-     */
     private ContextConstants() {
         // Empty constructor
     }
-
-    /**
-     * Use with {@link android.content.Context#getSystemService} to retrieve a
-     * {@link lineageos.app.ProfileManager} for informing the user of
-     * background events.
-     *
-     * @see android.content.Context#getSystemService
-     * @see lineageos.app.ProfileManager
-     *
-     * @hide
-     */
-    public static final String LINEAGE_PROFILE_SERVICE = "profile";
 
     public static class Features {
 
         public static final String PROFILES = "org.lineageos.profiles";
     }
+
+    public static final String LINEAGE_PROFILE_SERVICE = "profile";
+
 }

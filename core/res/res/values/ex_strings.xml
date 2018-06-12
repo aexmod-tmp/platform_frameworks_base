@@ -174,5 +174,8 @@
     <string name="profileNameAutomobile">Automobile</string>
 
     <string name="app_blacklist">Blacklist app</string>
+
+    <string name="live_display_title">LiveDisplay</string>
+    <string name="live_display_hint">LiveDisplay can help reduce eyestrain and help you sleep at night. Click here to try it out!</string>
 </resources>
 

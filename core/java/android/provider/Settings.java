@@ -1198,6 +1198,18 @@ public final class Settings {
     public static final String ACTION_ZEN_MODE_EXTERNAL_RULE_SETTINGS
             = "android.settings.ZEN_MODE_EXTERNAL_RULE_SETTINGS";
 
+
+    /**
+     * Activity Action: Show LiveDisplay settings
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_LIVEDISPLAY_SETTINGS =
+            "lineageos.settings.LIVEDISPLAY_SETTINGS";
+
     /**
      * Activity Action: Show the regulatory information screen for the device.
      * <p>
@@ -5272,6 +5284,30 @@ public final class Settings {
 
 
         public static final String SYSTEM_PROFILES_ENABLED = "system_profiles_enabled";
+
+
+
+        public static final String DISPLAY_TEMPERATURE_DAY = "display_temperature_day";
+
+        public static final String DISPLAY_TEMPERATURE_NIGHT = "display_temperature_night";
+
+        public static final String DISPLAY_TEMPERATURE_MODE = "display_temperature_mode";
+
+        public static final String DISPLAY_COLOR_ENHANCE = "display_color_enhance";
+
+        public static final String DISPLAY_CABC = "display_low_power";
+
+        public static final String DISPLAY_READING_MODE = "display_reading_mode";
+
+        public static final String DISPLAY_AUTO_OUTDOOR_MODE = "display_auto_outdoor_mode";
+
+        public static final String DISPLAY_PICTURE_ADJUSTMENT = "display_picture_adjustment";
+
+        public static final String DISPLAY_AUTO_CONTRAST = "display_auto_contrast";
+
+        public static final String DISPLAY_COLOR_ADJUSTMENT = "display_color_adjustment";
+
+        public static final String LIVE_DISPLAY_HINTED = "live_display_hinted";
 
         /**
          * These are all public system settings

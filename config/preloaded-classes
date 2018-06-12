@@ -4734,7 +4734,7 @@ sun.util.locale.StringTokenIterator
 sun.util.logging.LoggingProxy
 sun.util.logging.LoggingSupport
 sun.util.logging.LoggingSupport$1
-sun.util.logging.PlatformLogger
+sun.util.logging.PlatformLogger 
 sun.util.logging.PlatformLogger$1
 sun.util.logging.PlatformLogger$Level
 
@@ -4744,3 +4744,11 @@ com.android.internal.util.lineageos.app.IProfileManager$Stub$Proxy
 
 com.android.internal.util.lineageos.app.Profile
 com.android.internal.util.lineageos.app.ProfileManager
+
+com.github.aexmod.livedisplay.ILiveDisplayService
+com.github.aexmod.livedisplay.ILiveDisplayService$Stub
+com.github.aexmod.livedisplay.ILiveDisplayService$Stub$Proxy
+
+com.github.aexmod.livedisplay.ILineageHardwareService
+com.github.aexmod.livedisplay.ILineageHardwareService$Stub
+com.github.aexmod.livedisplay.ILineageHardwareService$Stub$Proxy

@@ -4611,5 +4611,7 @@ message MetricsEvent {
     OMNI_QS_WEATHER_DETAILS = 1502;
 
     SYSTEM_PROFILES = 1503;
+
+    TILE_LIVE_DISPLAY = 1504;
   }
 }

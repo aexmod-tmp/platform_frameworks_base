@@ -105,6 +105,8 @@ import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
 import com.android.server.broadcastradio.BroadcastRadioService;
 import com.android.server.profiles.ProfileManagerService;
+import com.android.server.livedisplay.LineageHardwareService;
+import com.android.server.livedisplay.LiveDisplayService;
 import com.android.server.restrictions.RestrictionsManagerService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
@@ -1626,6 +1628,16 @@ public final class SystemServer {
         traceBeginAndSlog("StartProfileManagerService");
         mSystemServiceManager.startService(com.android.server.profiles.ProfileManagerService.class);
         //ServiceManager.addService(ContextConstants.LINEAGE_PROFILE_SERVICE, new ProfileManagerService(context));
+        traceEnd();
+
+        traceBeginAndSlog("StartLineageHardwareService");
+        mSystemServiceManager.startService(com.android.server.livedisplay.LineageHardwareService.class);
+        //ServiceManager.addService(ContextConstants.LINEAGE_PROFILE_SERVICE, new LiveDisplayService(context));
+        traceEnd();
+
+        traceBeginAndSlog("StartLiveDisplayService");
+        mSystemServiceManager.startService(com.android.server.livedisplay.LiveDisplayService.class);
+        //ServiceManager.addService(ContextConstants.LINEAGE_PROFILE_SERVICE, new LiveDisplayService(context));
         traceEnd();
 
         // It is now time to start up the app processes...
