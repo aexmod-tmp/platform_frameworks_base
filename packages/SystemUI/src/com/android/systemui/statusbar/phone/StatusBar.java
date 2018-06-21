@@ -3246,6 +3246,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         return ThemeAccentUtils.isUsingExtendedTheme(mOverlayManager, mCurrentUserId);
     }
 
+    public boolean isUsingChocolateTheme() {
+        return ThemeAccentUtils.isUsingChocolateTheme(mOverlayManager, mCurrentUserId);
+    }
+
     // Unloads the stock dark theme
     public void unloadStockDarkTheme() {
         ThemeAccentUtils.unloadStockDarkTheme(mOverlayManager, mCurrentUserId);
@@ -5443,9 +5447,12 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         int userThemeSetting = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.SYSTEM_THEME_STYLE, 0, mCurrentUserId);
+
+        boolean useChocolateTheme = false;
         boolean useExtendedTheme = false;
         boolean useBlackTheme = false;
         boolean useDarkTheme = false;
+
         if (userThemeSetting == 0) {
             // The system wallpaper defines if QS should be light or dark.
             WallpaperColors systemColors = mColorExtractor
@@ -5459,6 +5466,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             useDarkTheme = userThemeSetting == 2;
             useBlackTheme = userThemeSetting == 3;
             useExtendedTheme = userThemeSetting == 4;
+            useChocolateTheme = userThemeSetting == 5;
+        }
+        if (isUsingDarkTheme() != useDarkTheme) {
             // Check for black and white accent so we don't end up
             // with white on white or black on black
             unfuckBlackWhiteAccent();
@@ -5472,6 +5482,13 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         if (isUsingExtendedTheme() != useExtendedTheme) {
             ThemeAccentUtils.setLightExtendedTheme(mOverlayManager, mCurrentUserId, useExtendedTheme);
+        }
+
+        if (isUsingChocolateTheme() != useChocolateTheme) {
+            // Check for black and white accent so we don't end up
+            // with white on white or black on black
+            unfuckBlackWhiteAccent();
+            ThemeAccentUtils.setLightChocolateTheme(mOverlayManager, mCurrentUserId, useChocolateTheme);
         }
 
         // Lock wallpaper defines the color of the majority of the views, hence we'll use it
