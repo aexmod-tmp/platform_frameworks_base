@@ -4404,6 +4404,8 @@ public class TelephonyManager {
             return;
         }
 
+        Rlog.d(TAG, "setTelephonyProperty: success phoneId=" + phoneId +
+                " property=" + property + " value: " + value + " propVal=" + propVal);
         SystemProperties.set(property, propVal);
     }
 

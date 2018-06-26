@@ -315,7 +315,6 @@ public class NotificationManagerService extends SystemService {
     private Uri mInCallNotificationUri;
     private AudioAttributes mInCallNotificationAudioAttributes;
     private float mInCallNotificationVolume;
-    private Binder mCallNotificationToken = null;
 
     // used as a mutex for access to all active notifications & listeners
     final Object mNotificationLock = new Object();
@@ -3431,9 +3430,9 @@ public class NotificationManagerService extends SystemService {
                 public void run() {
                     synchronized (mNotificationLock) {
                         removeForegroundServiceFlagByListLocked(
-                                mEnqueuedNotifications, pkg, notificationId, userId, false);
+                                mEnqueuedNotifications, pkg, notificationId, userId);
                         removeForegroundServiceFlagByListLocked(
-                                mNotificationList, pkg, notificationId, userId, true);
+                                mNotificationList, pkg, notificationId, userId);
                     }
                 }
             });
@@ -3442,7 +3441,7 @@ public class NotificationManagerService extends SystemService {
         @GuardedBy("mNotificationLock")
         private void removeForegroundServiceFlagByListLocked(
                 ArrayList<NotificationRecord> notificationList, String pkg, int notificationId,
-                int userId, boolean needPosted) {
+                int userId) {
             NotificationRecord r = findNotificationByListLocked(
                     notificationList, pkg, null, notificationId, userId);
             if (r == null) {
@@ -3455,10 +3454,8 @@ public class NotificationManagerService extends SystemService {
             // initially *and* force remove FLAG_FOREGROUND_SERVICE.
             sbn.getNotification().flags =
                     (r.mOriginalFlags & ~Notification.FLAG_FOREGROUND_SERVICE);
-            if (needPosted) {
-                mRankingHelper.sort(mNotificationList);
-                mListeners.notifyPostedLocked(sbn, sbn /* oldSbn */);
-            }
+            mRankingHelper.sort(mNotificationList);
+            mListeners.notifyPostedLocked(sbn, sbn /* oldSbn */);
         }
     };
 
@@ -4302,11 +4299,7 @@ public class NotificationManagerService extends SystemService {
                 try {
                     final IRingtonePlayer player = mAudioManager.getRingtonePlayer();
                     if (player != null) {
-                        if (mCallNotificationToken != null) {
-                            player.stop(mCallNotificationToken);
-                        }
-                        mCallNotificationToken = new Binder();
-                        player.play(mCallNotificationToken, mInCallNotificationUri,
+                        player.play(new Binder(), mInCallNotificationUri,
                                 mInCallNotificationAudioAttributes,
                                 mInCallNotificationVolume, false);
                     }

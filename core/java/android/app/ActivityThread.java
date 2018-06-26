@@ -612,7 +612,7 @@ public final class ActivityThread {
                         streamingOutput);
                 profiling = true;
             } catch (RuntimeException e) {
-                Slog.w(TAG, "Profiling failed on path " + profileFile, e);
+                Slog.w(TAG, "Profiling failed on path " + profileFile);
                 try {
                     profileFd.close();
                     profileFd = null;
