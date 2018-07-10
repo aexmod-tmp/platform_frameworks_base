@@ -4119,6 +4119,12 @@ public final class Settings {
         public static final String SHOW_FOURG = "show_fourg";
 
         /**
+         * Show data activity arrows
+         * @hide
+         */
+        public static final String SHOW_DATA_ACTIVITY = "show_data_activity";
+
+        /**
          * show clear all recents button
          * @hide
          */

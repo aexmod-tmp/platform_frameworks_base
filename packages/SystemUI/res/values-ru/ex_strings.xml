@@ -36,6 +36,10 @@
     <string name="show_fourg_title">4G вместо LTE</string>
     <string name="show_fourg_summary">Заменить значок LTE на 4G в статусбаре</string>
 
+    <!-- Data activity switch -->
+    <string name="show_data_activity_title">Сетевая активность</string>
+    <string name="show_data_activity_summary">Отображать стрелки при передачи данных</string>
+
     <!-- Reboot panel -->
     <string name="global_action_restart_advanced">Расшир. перезагрузка</string>
     <string name="global_action_screenrecord">Запись экрана</string>

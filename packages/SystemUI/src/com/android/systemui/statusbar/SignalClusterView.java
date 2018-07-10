@@ -53,6 +53,7 @@ import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
+import android.provider.Settings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -312,7 +313,9 @@ public class SignalClusterView extends LinearLayout implements NetworkController
     }
 
     private void updateActivityEnabled() {
-        mActivityEnabled = mContext.getResources().getBoolean(R.bool.config_showActivity);
+        //mActivityEnabled = mContext.getResources().getBoolean(R.bool.config_showActivity);
+	mActivityEnabled = Settings.System.getInt(mContext.getContentResolver(),
+             Settings.System.SHOW_DATA_ACTIVITY, 0) == 1;
     }
 
     @Override

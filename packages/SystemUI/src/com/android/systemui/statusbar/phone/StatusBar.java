@@ -502,6 +502,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     // 4G instead of LTE
     private boolean mShow4G;
 
+    // Data activity arrows
+    private boolean mShowDataAct;
+
     private boolean mAutomaticBrightness;
     private boolean mBrightnessControl;
     private boolean mBrightnessChanged;
@@ -6714,6 +6717,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                     Settings.System.SHOW_FOURG),
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SHOW_DATA_ACTIVITY),
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.DOUBLE_TAP_SLEEP_LOCKSCREEN),
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
@@ -6804,6 +6810,16 @@ public class StatusBar extends SystemUI implements DemoMode,
                             updateClearAll();
                             updateEmptyShadeView();
             } else if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.SHOW_DATA_ACTIVITY))) {
+                    mShowDataAct = Settings.System.getIntForUser(
+                            mContext.getContentResolver(),
+                            Settings.System.SHOW_DATA_ACTIVITY,
+                            0, UserHandle.USER_CURRENT) == 1;
+                            mCommandQueue.restartUI();
+                            updateRowStates();
+                            updateClearAll();
+                            updateEmptyShadeView();
+	    } else if (uri.equals(Settings.System.getUriFor(
                     Settings.System.ACCENT_PICKER))) {
                 // Unload the accents and update the accent only when the user asks.
                 // Keeps us from overloading the system by performing these tasks every time.
@@ -6844,7 +6860,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             ContentResolver resolver = mContext.getContentResolver();
             boolean mShow4G = Settings.System.getIntForUser(resolver,
                     Settings.System.SHOW_FOURG, 0, UserHandle.USER_CURRENT) == 1;
-	        setLockscreenDoubleTapToSleep();
+	    setLockscreenDoubleTapToSleep();
             setStatusDoubleTapToSleep();
             setLockscreenMediaMetadata();
             updateQsPanelResources();
@@ -6854,7 +6870,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             setQsPanelOptions();
             updateTheme();
             setForceAmbient();
-	        setQSScroller();
+	    setQSScroller();
             updateRecentsIconPack();
             updateBatterySettings();
             updateTickerAnimation();            
