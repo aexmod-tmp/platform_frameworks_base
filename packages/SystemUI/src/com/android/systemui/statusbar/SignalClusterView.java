@@ -26,8 +26,6 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.telephony.SubscriptionInfo;
-import android.telephony.SubscriptionManager;
-import android.telephony.TelephonyManager;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -338,12 +336,7 @@ public class SignalClusterView extends LinearLayout implements NetworkController
         if (state == null) {
             return;
         }
-
-        final int slotId = SubscriptionManager.getSlotId(subId);
-        final int simState = SubscriptionManager.getSimStateForSlotIdx(slotId);
-
-        state.mMobileVisible = statusIcon.visible && !mBlockMobile &&
-                simState != TelephonyManager.SIM_STATE_NOT_READY;
+        state.mMobileVisible = statusIcon.visible && !mBlockMobile;
         state.mMobileStrengthId = statusIcon.icon;
         state.mMobileTypeId = statusType;
         state.mMobileDescription = statusIcon.contentDescription;
