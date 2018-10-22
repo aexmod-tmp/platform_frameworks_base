@@ -226,7 +226,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
 
         state.visible = statusIcon.visible && !mBlockMobile;
         state.strengthId = statusIcon.icon;
-        state.typeId = statusType;
+        state.typeId = volte ? 0 : statusType;
         state.contentDescription = statusIcon.contentDescription;
         state.typeContentDescription = typeContentDescription;
         state.roaming = roaming && !mBlockRoaming;
