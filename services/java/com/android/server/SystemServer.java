@@ -688,12 +688,6 @@ public final class SystemServer {
 
         traceEnd();
 
-        if (SystemProperties.getInt("persist.sys.displayinset.top", 0) > 0) {
-            // DisplayManager needs the overlay immediately.
-            overlayManagerService.updateSystemUiContext();
-            LocalServices.getService(DisplayManagerInternal.class).onOverlayChanged();
-        }
-
         // The sensor service needs access to package manager service, app ops
         // service, and permissions service, therefore we start it after them.
         // Start sensor service in a separate thread. Completion should be checked
